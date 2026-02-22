@@ -3,7 +3,6 @@ services:
     name: ma-cave-api
     runtime: python
     plan: free
-    rootDir: render-backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 2 --timeout 30
     envVars:
