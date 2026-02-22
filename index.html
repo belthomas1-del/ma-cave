@@ -7,20 +7,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
   <title>Ma Cave</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    html{height:100%}
+    *{box-sizing:border-box;margin:0;padding:0}html{height:100%}
     body{font-family:'Outfit',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overflow-x:hidden;min-height:100dvh;font-size:15px;line-height:1.5}
-    h1,h2,h3{font-family:'Cormorant Garamond',Georgia,serif}
-    input,select,textarea{padding:12px 16px;border-radius:10px;font-family:inherit;font-size:15px;width:100%;outline:none;transition:all 0.2s}
-    select{appearance:auto}
-    button{font-family:inherit;cursor:pointer;border:none}
+    h1,h2,h3{font-family:'Playfair Display',Georgia,serif}
+    input,select,textarea{padding:12px 16px;border-radius:12px;font-family:inherit;font-size:15px;width:100%;outline:none;transition:all 0.2s}
+    input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(107,29,42,0.1)}
+    select{appearance:auto}button{font-family:inherit;cursor:pointer;border:none}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes popIn{from{transform:scale(0.92);opacity:0}to{transform:scale(1);opacity:1}}
-    .rack-cell:active{transform:scale(0.93);transition:transform 0.1s}
   </style>
 </head>
 <body>
@@ -30,529 +28,250 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script type="text/babel">
-const{useState,useEffect,useMemo,useCallback}=React;
+const{useState,useEffect,useMemo}=React;
+const TH={light:{bg:"#F7F4EF",bg2:"#EFEBE4",bg3:"#DDD7CC",card:"#FFFFFF",cardB:"#E8E2D8",ink:"#1C1210",ink2:"#3E2D22",ink3:"#6A5A50",ink4:"#9A8A7E",hdr:"linear-gradient(145deg,#2A1508,#3D1E10,#2A1508)",hdrT:"#F0DFC8",nav:"#FFFFFF",navB:"#E8E2D8",accent:"#6B1D2A",accentT:"#fff",gold:"#A67C00",goldBg:"#FFF9EC",danBg:"#FFF0EE",danT:"#B83230",okBg:"#EEF7EE",okT:"#2E7D32",warnBg:"#FFF8E8",inBg:"#fff",inB:"#DDD6CA",sh:"0 1px 6px rgba(30,15,5,0.06)"},dark:{bg:"#141014",bg2:"#1E1820",bg3:"#2A2228",card:"rgba(255,255,255,0.04)",cardB:"rgba(255,255,255,0.07)",ink:"#EDE4D8",ink2:"#C0B0A0",ink3:"#807060",ink4:"#504540",hdr:"linear-gradient(145deg,#0E080C,#1A1015,#0E080C)",hdrT:"#D4BC9A",nav:"#141014",navB:"rgba(255,255,255,0.06)",accent:"#D4A855",accentT:"#0E080C",gold:"#D4A855",goldBg:"rgba(212,168,85,0.08)",danBg:"rgba(180,50,48,0.1)",danT:"#E8A0A0",okBg:"rgba(60,160,60,0.08)",okT:"#80C880",warnBg:"rgba(180,160,80,0.08)",inBg:"rgba(255,255,255,0.05)",inB:"rgba(255,255,255,0.08)",sh:"0 1px 6px rgba(0,0,0,0.2)"}};
+const RKS={wood:{name:"Bois",em:"\u{1FAB5}",bg:"linear-gradient(180deg,#7A6040,#5C4225 50%,#4A3518)",brd:"rgba(90,60,30,0.5)",shd:"inset 0 3px 8px rgba(0,0,0,0.3)",lbl:"rgba(220,190,140,0.3)",gr:"repeating-linear-gradient(0deg,transparent 0px,transparent 4px,rgba(30,15,5,0.1) 4px,rgba(30,15,5,0.1) 5px)"},metal:{name:"M\u00e9tal",em:"\uD83D\uDD29",bg:"linear-gradient(180deg,#484848,#2C2C2C 50%,#222)",brd:"rgba(90,90,90,0.4)",shd:"inset 0 2px 6px rgba(0,0,0,0.3)",lbl:"rgba(180,180,180,0.3)",gr:"none"},stone:{name:"Pierre",em:"\uD83C\uDFF0",bg:"linear-gradient(180deg,#554840,#3E3530 50%,#332C25)",brd:"rgba(80,65,50,0.4)",shd:"inset 0 4px 10px rgba(0,0,0,0.3)",lbl:"rgba(190,170,140,0.25)",gr:"none"}};
+const TP={rouge:{l:"Rouge",ic:"\uD83C\uDF77",c:"#722040",lt:"#F5E8EB",dk:"#281218",gd:"linear-gradient(135deg,#6B1D2A,#8B3345)"},blanc:{l:"Blanc",ic:"\uD83E\uDD42",c:"#A88010",lt:"#FBF5E6",dk:"#2A2410",gd:"linear-gradient(135deg,#A88010,#C8A430)"},rose:{l:"Ros\u00e9",ic:"\uD83C\uDF38",c:"#C07088",lt:"#FCF0F3",dk:"#2A1520",gd:"linear-gradient(135deg,#B86080,#D890A0)"},petillant:{l:"P\u00e9tillant",ic:"\u2728",c:"#C0A030",lt:"#FDF8E8",dk:"#2A2515",gd:"linear-gradient(135deg,#B89820,#D0B840)"}};
+const RC={rouge:{"Bordeaux":"#4A0E1B","Bourgogne":"#6B1D35","Rh\u00f4ne":"#5C1A1A","Loire":"#8B3A3A","Languedoc":"#6E2828","Beaujolais":"#9B2845","Provence":"#7A3A3A","Sud-Ouest":"#7A3535","Autre":"#5A2525"},blanc:{"Alsace":"#B8860B","Bourgogne":"#A07A10","Loire":"#8B7020","Bordeaux":"#957A15","Champagne":"#AA8A05","Jura":"#887020","Autre":"#907818"},rose:{"Provence":"#C06080","Loire":"#B87088","Languedoc":"#B06878","Autre":"#A86878"},petillant:{"Champagne":"#D4AF37","Cr\u00e9mant d'Alsace":"#C0A030","Prosecco":"#C8A830","Autre":"#B8A030"}};
+const bCol=b=>b?(RC[b.type]||{})[b.region]||TP[b.type]?.c||"#722040":null;
+const clsf=id=>({1:"rouge",2:"blanc",3:"petillant",4:"rose",7:"rose"}[id]||"rouge");
+function mapR(n){if(!n)return"Autre";const r=n.toLowerCase();const m={"bordeaux":"Bordeaux","bourgogne":"Bourgogne","burgundy":"Bourgogne","rh\u00f4ne":"Rh\u00f4ne","rhone":"Rh\u00f4ne","loire":"Loire","alsace":"Alsace","champagne":"Champagne","languedoc":"Languedoc","roussillon":"Languedoc","provence":"Provence","beaujolais":"Beaujolais","sud-ouest":"Sud-Ouest","jura":"Jura","savoie":"Savoie","corse":"Corse","corsica":"Corse","toscana":"Italie","tuscany":"Italie","piemonte":"Italie","piedmont":"Italie","veneto":"Italie","rioja":"Espagne","ribera":"Espagne"};for(const[k,v]of Object.entries(m))if(r.includes(k))return v;return n.length>2?n:"Autre"}
+const SK="cave-v8",ld=()=>{try{return JSON.parse(localStorage.getItem(SK))||{}}catch{return{}}},sv=d=>{try{localStorage.setItem(SK,JSON.stringify(d))}catch{}};
+const pBE=r=>({name:r.name,winery:r.winery||"",vintage:r.vintage||null,type:clsf(r.type_id),region:mapR(r.region),region_raw:r.region||"",rating:r.rating,price:r.price,image:r.image||null,grape:r.grape||null,description:r.description||null,vivino_url:r.seo_name?`https://www.vivino.com${r.seo_name}`:null,added:null,notes:null,apogee_start:null,apogee_end:null});
+const pVR=d=>(d?.explore_vintage?.matches||[]).slice(0,10).map(m=>{const v=m.vintage||{},w=v.wine||{},s=v.statistics||{};let img=v.image?.location;if(img&&!img.startsWith("http"))img="https:"+img;const name=w.name||"";if(!name)return null;return{name,winery:w.winery?.name||"",vintage:v.year||null,type:clsf(w.type_id),region:mapR(w.region?.name||w.region?.country?.name||""),region_raw:w.region?.name||"",rating:s.ratings_average?Math.round(s.ratings_average*10)/10:null,price:m.price?.amount?m.price.amount.toFixed(0)+"\u20ac":null,image:img||null,grape:(w.grapes||[]).map(g=>g.name).filter(Boolean).join(", ")||null,description:w.description||null,vivino_url:w.seo_name?`https://www.vivino.com${w.seo_name}`:null,added:null,notes:null,apogee_start:null,apogee_end:null}}).filter(Boolean);
+async function doSrch(q,url,onS,onL){const log=onL||(()=>{});if(url){onS("backend");log("\u2601\ufe0f Serveur...");try{const c=new AbortController,t=setTimeout(()=>c.abort(),20000);const r=await fetch(`${url}/search?q=${encodeURIComponent(q)}`,{signal:c.signal});clearTimeout(t);if(r.ok){const d=await r.json();if(d.results?.length){log(`\u2705 ${d.results.length} r\u00e9sultats`);return{results:d.results.map(pBE),src:"serveur"}}}else{const e=await r.json().catch(()=>({}));log(`\u274c HTTP ${r.status}: ${e.error||e.hint||""}`)}}catch(e){log(`\u274c ${e.name==="AbortError"?"Timeout \u2014 serveur en d\u00e9marrage, r\u00e9essayez dans 30s":e.message}`)}}else log("\u26a0\ufe0f Pas de serveur \u2192 R\u00e9glages");onS("proxy");const vu=`https://www.vivino.com/api/explore/explore?q=${encodeURIComponent(q)}&country_code=FR&currency_code=EUR&language=fr&page=1`;for(const[n,fn]of[["allorigins",u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`],["corsproxy",u=>`https://corsproxy.io/?${encodeURIComponent(u)}`]]){log(`\u23f3 ${n}...`);try{const c=new AbortController,t=setTimeout(()=>c.abort(),10000);const r=await fetch(fn(vu),{signal:c.signal});clearTimeout(t);if(!r.ok){log(`\u274c ${n}: HTTP ${r.status}`);continue}const txt=await r.text();let d;try{const j=JSON.parse(txt);d=j.contents?JSON.parse(j.contents):j}catch{log(`\u274c ${n}: pas JSON`);continue}const res=pVR(d);if(res.length){log(`\u2705 ${res.length} via ${n}`);return{results:res,src:n}}}catch(e){log(`\u274c ${n}: ${e.name==="AbortError"?"timeout":e.message}`)}}return null}
 
-/* ═══ THEMES ═══ */
-const COLORS={
-  light:{
-    bg:"#F8F5F0",bg2:"#EFEBE4",bg3:"#E2DCD3",card:"#fff",cardB:"#E8E2D8",
-    ink:"#1A0F0A",ink2:"#3D2D22",ink3:"#6B5A50",ink4:"#9A8A80",
-    hdr:"linear-gradient(135deg,#2C1810 0%,#3E2518 50%,#2C1810 100%)",hdrT:"#EDD9C0",
-    nav:"#fff",navB:"#E8E2D8",
-    accent:"#6B1D2A",accentT:"#fff",
-    gold:"#A67C00",goldBg:"#FFF8E8",
-    dangerBg:"#FDEDEC",dangerT:"#C0392B",
-    successBg:"#EDF7ED",successT:"#2E7D32",
-    inputBg:"#fff",inputB:"#DDD6CC",
-    shadow:"0 1px 8px rgba(30,15,5,0.07)",
-  },
-  dark:{
-    bg:"#161012",bg2:"#201820",bg3:"#2C2228",card:"rgba(255,255,255,0.05)",cardB:"rgba(255,255,255,0.08)",
-    ink:"#EDE4D8",ink2:"#C0B0A0",ink3:"#806C60",ink4:"#584840",
-    hdr:"linear-gradient(135deg,#100A0D 0%,#1A1015 50%,#100A0D 100%)",hdrT:"#D4BC9A",
-    nav:"#161012",navB:"rgba(255,255,255,0.06)",
-    accent:"#D4A855",accentT:"#100A0D",
-    gold:"#D4A855",goldBg:"rgba(212,168,85,0.1)",
-    dangerBg:"rgba(180,40,40,0.12)",dangerT:"#E0A0A0",
-    successBg:"rgba(60,160,60,0.1)",successT:"#80C880",
-    inputBg:"rgba(255,255,255,0.06)",inputB:"rgba(255,255,255,0.1)",
-    shadow:"0 2px 12px rgba(0,0,0,0.3)",
-  }
-};
-const RACKS={
-  wood:{name:"Casier bois",emoji:"🪵",
-    bg:"linear-gradient(180deg,#7A6040 0%,#6B5030 8%,#5C4225 50%,#6B5030 92%,#4A3518 100%)",
-    shadow:"0 6px 24px rgba(40,20,5,0.3)",
-    cellBg:"rgba(0,0,0,0.15)",cellBorder:"rgba(90,60,30,0.6)",cellShadow:"inset 0 3px 8px rgba(0,0,0,0.25)",
-    labelC:"rgba(220,190,140,0.35)",
-    grain:"repeating-linear-gradient(0deg,transparent 0px,transparent 4px,rgba(30,15,5,0.12) 4px,rgba(30,15,5,0.12) 5px)"},
-  metal:{name:"Cage métal",emoji:"🔩",
-    bg:"linear-gradient(180deg,#484848 0%,#383838 8%,#2C2C2C 50%,#383838 92%,#222 100%)",
-    shadow:"0 6px 24px rgba(0,0,0,0.35)",
-    cellBg:"rgba(0,0,0,0.2)",cellBorder:"rgba(90,90,90,0.5)",cellShadow:"inset 0 2px 6px rgba(0,0,0,0.3)",
-    labelC:"rgba(180,180,180,0.35)",
-    grain:"repeating-linear-gradient(90deg,transparent 0px,transparent 20px,rgba(150,150,150,0.06) 20px,rgba(150,150,150,0.06) 21px)"},
-  stone:{name:"Cave voûtée",emoji:"🏰",
-    bg:"linear-gradient(180deg,#554840 0%,#4A3E35 8%,#3E3530 50%,#4A3E35 92%,#332C25 100%)",
-    shadow:"0 6px 24px rgba(20,10,5,0.4)",
-    cellBg:"rgba(0,0,0,0.18)",cellBorder:"rgba(80,65,50,0.5)",cellShadow:"inset 0 4px 10px rgba(0,0,0,0.3)",
-    labelC:"rgba(190,170,140,0.3)",
-    grain:"none"},
-};
-
-/* ═══ WINE CONFIG ═══ */
-const TYPES={
-  rouge:{label:"Rouge",icon:"🍷",color:"#6B1D2A",light:"#F5E8EB",dark:"#2A1218"},
-  blanc:{label:"Blanc",icon:"🥂",color:"#B8860B",light:"#FBF5E6",dark:"#2A2410"},
-  rose:{label:"Rosé",icon:"🌸",color:"#C87088",light:"#FCF0F3",dark:"#2A1520"},
-  petillant:{label:"Pétillant",icon:"✨",color:"#C8A030",light:"#FDF8E8",dark:"#2A2515"}
-};
-const REG_C={rouge:{"Bordeaux":"#4A0E1B","Bourgogne":"#6B1D35","Rhône":"#5C1A1A","Loire":"#8B3A3A","Languedoc":"#6E2828","Sud-Ouest":"#7A3535","Beaujolais":"#9B2845","Provence":"#7A3A3A","Corse":"#502020","Italie":"#6B2535","Espagne":"#5E1E2E","Autre":"#5A2525"},blanc:{"Alsace":"#B8860B","Bourgogne":"#A07A10","Loire":"#8B7020","Bordeaux":"#957A15","Champagne":"#AA8A05","Jura":"#887020","Savoie":"#9A8530","Provence":"#A89028","Italie":"#9A8015","Espagne":"#8A7510","Autre":"#907818"},rose:{"Provence":"#C06080","Loire":"#B87088","Languedoc":"#B06878","Rhône":"#A86070","Bordeaux":"#A05868","Italie":"#C07888","Espagne":"#B06878","Autre":"#A86878"},petillant:{"Champagne":"#D4AF37","Crémant d'Alsace":"#C0A030","Crémant de Bourgogne":"#B09528","Crémant de Loire":"#A89030","Prosecco":"#C8A830","Cava":"#B09525","Autre":"#B8A030"}};
-function bColor(b){return b?(REG_C[b.type]||{})[b.region]||TYPES[b.type]?.color||"#6B1D2A":null;}
-function classify(id){return{1:"rouge",2:"blanc",3:"petillant",4:"rose",7:"rose"}[id]||"rouge";}
-function mapReg(n){if(!n)return"Autre";const r=n.toLowerCase();const m={"bordeaux":"Bordeaux","bourgogne":"Bourgogne","burgundy":"Bourgogne","rhône":"Rhône","rhone":"Rhône","loire":"Loire","alsace":"Alsace","champagne":"Champagne","languedoc":"Languedoc","roussillon":"Languedoc","provence":"Provence","beaujolais":"Beaujolais","sud-ouest":"Sud-Ouest","south west":"Sud-Ouest","jura":"Jura","savoie":"Savoie","corse":"Corse","corsica":"Corse","toscana":"Italie","tuscany":"Italie","piemonte":"Italie","piedmont":"Italie","veneto":"Italie","sicilia":"Italie","rioja":"Espagne","ribera":"Espagne","priorat":"Espagne","castilla":"Espagne","navarra":"Espagne"};for(const[k,v]of Object.entries(m))if(r.includes(k))return v;return n.length>2?n:"Autre";}
-
-/* ═══ STORAGE ═══ */
-const SK="cave-v7";
-const load=()=>{try{return JSON.parse(localStorage.getItem(SK))||{};}catch{return{};}};
-const save=(d)=>{try{localStorage.setItem(SK,JSON.stringify(d));}catch{}};
-
-/* ═══ SEARCH — BACKEND FIRST, PROXIES FALLBACK ═══ */
-function parseVivinoRaw(data){
-  return(data?.explore_vintage?.matches||[]).slice(0,10).map(m=>{
-    const v=m.vintage||{},w=v.wine||{},s=v.statistics||{};
-    let img=v.image?.location;if(img&&!img.startsWith("http"))img="https:"+img;
-    const rg=w.region?.name||w.region?.country?.name||"";
-    const grapes=(w.grapes||[]).map(g=>g.name).filter(Boolean);
-    const price=m.price?.amount?`${m.price.amount.toFixed(0)}€`:null;
-    const name=w.name||"";if(!name)return null;
-    return{name,winery:w.winery?.name||"",vintage:v.year||null,type:classify(w.type_id),region:mapReg(rg),region_raw:rg,
-      rating:s.ratings_average?Math.round(s.ratings_average*10)/10:null,price,image:img||null,
-      grape:grapes.join(", ")||null,description:w.description||null,
-      vivino_url:w.seo_name?`https://www.vivino.com${w.seo_name}`:null,
-      added:null,notes:null,apogee_start:null,apogee_end:null};
-  }).filter(Boolean);
-}
-function parseBackendResult(r){
-  return{name:r.name,winery:r.winery||"",vintage:r.vintage||null,type:classify(r.type_id),
-    region:mapReg(r.region),region_raw:r.region||"",rating:r.rating,price:r.price,image:r.image||null,
-    grape:r.grape||null,description:r.description||null,
-    vivino_url:r.seo_name?`https://www.vivino.com${r.seo_name}`:null,
-    added:null,notes:null,apogee_start:null,apogee_end:null};
-}
-
-async function doSearch(query,backendUrl,onStatus,onLog){
-  const log=onLog||(()=>{});
-
-  // 1. Try backend FIRST (most reliable)
-  if(backendUrl){
-    onStatus("backend");log("☁️ Serveur Render...");
-    try{
-      const c=new AbortController();const t=setTimeout(()=>c.abort(),15000);
-      const r=await fetch(`${backendUrl}/search?q=${encodeURIComponent(query)}`,{signal:c.signal});
-      clearTimeout(t);
-      if(r.ok){
-        const d=await r.json();
-        if(d.results?.length){
-          const parsed=d.results.map(parseBackendResult);
-          log(`✅ ${parsed.length} résultats via serveur`);
-          return{results:parsed,source:"serveur"};
-        }
-        log("⚠️ Serveur OK mais 0 résultat");
-      } else log(`❌ Serveur: HTTP ${r.status}`);
-    }catch(e){log(`❌ Serveur: ${e.name==="AbortError"?"Timeout (premier démarrage? réessayez dans 30s)":e.message}`);}
-  } else {
-    log("⚠️ Aucun serveur configuré — allez dans Réglages");
-  }
-
-  // 2. Try CORS proxies as fallback
-  const vivinoUrl=`https://www.vivino.com/api/explore/explore?q=${encodeURIComponent(query)}&country_code=FR&currency_code=EUR&language=fr&page=1&price_range_min=0&price_range_max=500`;
-  const proxies=[
-    {n:"allorigins",fn:u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`},
-    {n:"corsproxy",fn:u=>`https://corsproxy.io/?${encodeURIComponent(u)}`},
-    {n:"codetabs",fn:u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`},
-  ];
-  onStatus("proxy");
-  for(const p of proxies){
-    log(`⏳ Proxy ${p.n}...`);
-    try{
-      const c=new AbortController();const t=setTimeout(()=>c.abort(),10000);
-      const r=await fetch(p.fn(vivinoUrl),{signal:c.signal,headers:{Accept:"application/json"}});
-      clearTimeout(t);if(!r.ok){log(`❌ ${p.n}: HTTP ${r.status}`);continue;}
-      const txt=await r.text();
-      let data;try{const j=JSON.parse(txt);data=j.contents?JSON.parse(j.contents):j;}catch{log(`❌ ${p.n}: pas du JSON`);continue;}
-      const res=parseVivinoRaw(data);
-      if(res.length){log(`✅ ${res.length} via ${p.n}`);return{results:res,source:p.n};}
-      log(`⚠️ ${p.n}: 0 résultat`);
-    }catch(e){log(`❌ ${p.n}: ${e.name==="AbortError"?"Timeout":e.message}`);continue;}
-  }
-  return null;
-}
-
-/* ═══ APP ═══ */
 function App(){
-  const saved=load();
-  const[bottles,setBottles]=useState(saved.bottles||{});
-  const[config,setConfig]=useState({cols:10,rows:6,backendUrl:"",colorTheme:"light",rackTheme:"wood",...(saved.config||{})});
-  const[tab,setTab]=useState("rack");
-  const[modal,setModal]=useState(null);
-  const[query,setQuery]=useState("");
-  const[results,setResults]=useState([]);
-  const[searching,setSearching]=useState(false);
-  const[searchStatus,setSearchStatus]=useState("");
-  const[searchErr,setSearchErr]=useState("");
-  const[debugLog,setDebugLog]=useState([]);
-  const[manual,setManual]=useState(false);
-  const[form,setForm]=useState(ef());
-  const[editCfg,setEditCfg]=useState(config);
-  const[toast,setToast]=useState(null);
-  const[fType,setFType]=useState(null);
-  const[fRegion,setFRegion]=useState(null);
-  const[fSearch,setFSearch]=useState("");
-  const[fApogee,setFApogee]=useState(false);
-  const[showFilters,setShowFilters]=useState(false);
-
-  useEffect(()=>{save({bottles,config});},[bottles,config]);
-  useEffect(()=>{document.body.style.background=T.bg;document.body.style.color=T.ink;});
-
-  const T=COLORS[config.colorTheme]||COLORS.light;
-  const RK=RACKS[config.rackTheme]||RACKS.wood;
-
-  function ef(){return{name:"",vintage:"",type:"rouge",region:"Bordeaux",notes:"",image:"",apogee_start:"",apogee_end:""};}
-  const flash=(m)=>{setToast(m);setTimeout(()=>setToast(null),2500);};
-  const ck=(c,r)=>`${c}-${r}`;
-  const closeModal=()=>{setModal(null);setQuery("");setResults([]);setSearchErr("");setManual(false);setSearchStatus("");setForm(ef());setDebugLog([]);};
-
-  const runSearch=async()=>{
-    if(!query.trim())return;
-    setSearching(true);setSearchErr("");setResults([]);const logs=[];
-    const r=await doSearch(query.trim(),config.backendUrl,setSearchStatus,m=>{logs.push(m);setDebugLog([...logs]);});
-    if(r){setResults(r.results);setSearchStatus(r.source);}
-    else setSearchErr("Aucun résultat. "+(!config.backendUrl?"Configurez votre serveur Render dans les réglages.":"Réessayez ou passez en saisie manuelle."));
-    setSearching(false);
-  };
-
-  const addBottle=(key,data)=>{setBottles(p=>({...p,[key]:{...data,added:data.added||new Date().toISOString()}}));flash("✓ "+data.name);closeModal();};
-  const removeBottle=(key)=>{setBottles(p=>{const n={...p};delete n[key];return n;});flash("Bouteille retirée");closeModal();};
-
-  const allB=Object.values(bottles);
-  const cap=config.cols*config.rows;
-  const yr=new Date().getFullYear();
-  const caveRegs=useMemo(()=>[...new Set(allB.map(b=>b.region))].sort(),[bottles]);
-  const formRegs=useMemo(()=>[...new Set([...Object.keys(REG_C[form.type]||{}),...caveRegs])].sort(),[form.type,caveRegs]);
-
-  const stats=useMemo(()=>{
-    const s={total:0,types:{},regions:{},vintages:{},ratings:[],prices:[]};
-    allB.forEach(b=>{s.total++;s.types[b.type]=(s.types[b.type]||0)+1;s.regions[b.region]=(s.regions[b.region]||0)+1;
-      if(b.vintage)s.vintages[b.vintage]=(s.vintages[b.vintage]||0)+1;
-      if(b.rating)s.ratings.push(b.rating);if(b.price){const n=parseFloat(b.price);if(!isNaN(n))s.prices.push(n);}});
-    s.avgRating=s.ratings.length?(s.ratings.reduce((a,c)=>a+c,0)/s.ratings.length).toFixed(1):null;
-    s.totalValue=s.prices.length?s.prices.reduce((a,c)=>a+c,0):null;return s;
-  },[bottles]);
-
-  const isF=fType||fRegion||fSearch||fApogee;
-  const matchF=(b)=>{if(!b)return false;if(fType&&b.type!==fType)return false;if(fRegion&&b.region!==fRegion)return false;
-    if(fSearch){const q=fSearch.toLowerCase();if(!b.name.toLowerCase().includes(q)&&!(b.winery||"").toLowerCase().includes(q)&&!(b.vintage+"").includes(q))return false;}
-    if(fApogee){if(!b.apogee_start&&!b.apogee_end)return false;if(yr<(b.apogee_start||0)||yr>(b.apogee_end||9999))return false;}return true;};
-
-  const CW=56,CH=52; // bigger cells for photos
-  const is={background:T.inputBg,border:`1.5px solid ${T.inputB}`,color:T.ink};
+  const s0=ld();
+  const[bts,setBts]=useState(s0.bottles||{});
+  const[cfg,setCfg]=useState({cols:10,rows:6,backendUrl:"",colorTheme:"light",rackTheme:"wood",view:"list",...(s0.config||{})});
+  const[tab,setTab]=useState("cave");const[mdl,setMdl]=useState(null);const[qry,setQry]=useState("");const[res,setRes]=useState([]);const[srch,setSrch]=useState(false);const[srSt,setSrSt]=useState("");const[srEr,setSrEr]=useState("");const[dbg,setDbg]=useState([]);const[man,setMan]=useState(false);const[frm,setFrm]=useState(ef());const[ec,setEc]=useState(cfg);const[tst,setTst]=useState(null);const[fT,setFT]=useState(null);const[fR,setFR]=useState(null);const[fQ,setFQ]=useState("");const[fA,setFA]=useState(false);const[shF,setShF]=useState(false);
+  useEffect(()=>{sv({bottles:bts,config:cfg})},[bts,cfg]);
+  const T=TH[cfg.colorTheme]||TH.light,RK=RKS[cfg.rackTheme]||RKS.wood;
+  useEffect(()=>{document.body.style.background=T.bg;document.body.style.color=T.ink});
+  function ef(){return{name:"",vintage:"",type:"rouge",region:"Bordeaux",notes:"",image:"",apogee_start:"",apogee_end:""}}
+  const flash=m=>{setTst(m);setTimeout(()=>setTst(null),2500)};const ck=(c,r)=>`${c}-${r}`;
+  const clsM=()=>{setMdl(null);setQry("");setRes([]);setSrEr("");setMan(false);setSrSt("");setFrm(ef());setDbg([])};
+  const runS=async()=>{if(!qry.trim())return;setSrch(true);setSrEr("");setRes([]);const logs=[];const r=await doSrch(qry.trim(),cfg.backendUrl,setSrSt,m=>{logs.push(m);setDbg([...logs])});if(r){setRes(r.results);setSrSt(r.src)}else setSrEr(!cfg.backendUrl?"Configurez votre serveur dans R\u00e9glages.":"Aucun r\u00e9sultat. R\u00e9essayez dans ~30s ou saisie manuelle.");setSrch(false)};
+  const addB=(k,d)=>{setBts(p=>({...p,[k]:{...d,added:d.added||new Date().toISOString()}}));flash("\u2713 "+d.name);clsM()};
+  const rmB=k=>{setBts(p=>{const n={...p};delete n[k];return n});flash("Retir\u00e9");clsM()};
+  const firstE=()=>{for(let r=0;r<cfg.rows;r++)for(let c=0;c<cfg.cols;c++){const k=ck(c,r);if(!bts[k])return k}return null};
+  const allB=Object.values(bts);const cap=cfg.cols*cfg.rows;const yr=new Date().getFullYear();
+  const regs=useMemo(()=>[...new Set(allB.map(b=>b.region))].sort(),[bts]);
+  const fRegs=useMemo(()=>[...new Set([...Object.keys(RC[frm.type]||{}),...regs])].sort(),[frm.type,regs]);
+  const stats=useMemo(()=>{const s={n:0,tp:{},rg:{},vt:{},rt:[],pr:[]};allB.forEach(b=>{s.n++;s.tp[b.type]=(s.tp[b.type]||0)+1;s.rg[b.region]=(s.rg[b.region]||0)+1;if(b.vintage)s.vt[b.vintage]=(s.vt[b.vintage]||0)+1;if(b.rating)s.rt.push(b.rating);if(b.price){const n=parseFloat(b.price);if(!isNaN(n))s.pr.push(n)}});s.avgR=s.rt.length?(s.rt.reduce((a,c)=>a+c,0)/s.rt.length).toFixed(1):null;s.totV=s.pr.length?s.pr.reduce((a,c)=>a+c,0):null;return s},[bts]);
+  const isF=fT||fR||fQ||fA;
+  const mF=b=>{if(!b)return false;if(fT&&b.type!==fT)return false;if(fR&&b.region!==fR)return false;if(fQ){const q=fQ.toLowerCase();if(!b.name.toLowerCase().includes(q)&&!(b.winery||"").toLowerCase().includes(q)&&!(b.vintage+"").includes(q))return false}if(fA){if(!b.apogee_start&&!b.apogee_end)return false;if(yr<(b.apogee_start||0)||yr>(b.apogee_end||9999))return false}return true};
+  const is={background:T.inBg,border:`1.5px solid ${T.inB}`,color:T.ink};const CW=48,CH=42;
 
   return(
     <div style={{minHeight:"100dvh",display:"flex",flexDirection:"column",background:T.bg,color:T.ink}}>
-
-      {/* HEADER */}
       <header style={{background:T.hdr,color:T.hdrT,padding:"20px 20px 16px",position:"relative"}}>
-        <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between"}}>
-          <div>
-            <h1 style={{fontSize:28,fontWeight:700,color:T.hdrT,letterSpacing:0.5,lineHeight:1}}>Ma Cave</h1>
-            <div style={{fontSize:12,color:"rgba(237,217,192,0.45)",marginTop:6,fontWeight:400}}>
-              {stats.total} bouteille{stats.total>1?"s":""}{stats.total>0?` · ${Math.round(stats.total/cap*100)}%`:" · vide"}
-            </div>
-          </div>
-          {tab==="rack"&&<button onClick={()=>setShowFilters(f=>!f)} style={{padding:"8px 16px",borderRadius:22,fontSize:13,fontWeight:600,background:showFilters||isF?"rgba(237,217,192,0.2)":"rgba(255,255,255,0.07)",color:T.hdrT,border:"1px solid rgba(237,217,192,0.12)"}}>
-            {isF?"⚡":"☰"} Filtres
-          </button>}
+        <div style={{position:"absolute",inset:0,opacity:0.04,backgroundImage:"radial-gradient(circle at 30% 50%,rgba(255,200,100,0.4),transparent 60%)"}}/>
+        <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",position:"relative"}}>
+          <div><h1 style={{fontSize:28,fontWeight:600,letterSpacing:-0.5}}>Ma Cave</h1>
+            <div style={{fontSize:13,color:"rgba(240,223,200,0.4)",marginTop:6,fontWeight:300}}>{stats.n} bouteille{stats.n>1?"s":""}{stats.n>0?` \u00b7 ${Math.round(stats.n/cap*100)}%`:""}</div></div>
+          {tab==="cave"&&<div style={{display:"flex",gap:6}}>
+            <button onClick={()=>setCfg(c=>({...c,view:c.view==="list"?"rack":"list"}))} style={{width:40,height:36,borderRadius:10,background:"rgba(255,255,255,0.07)",color:T.hdrT,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(240,223,200,0.1)"}}>{cfg.view==="list"?"\u229e":"\u2630"}</button>
+            <button onClick={()=>setShF(f=>!f)} style={{padding:"7px 14px",borderRadius:10,fontSize:13,fontWeight:600,background:shF||isF?"rgba(240,223,200,0.15)":"rgba(255,255,255,0.07)",color:T.hdrT,border:"1px solid rgba(240,223,200,0.1)"}}>{isF?"\u26a1 Filtres":"Filtres"}</button>
+          </div>}
         </div>
       </header>
-
-      {/* FILTERS (rack only) */}
-      {showFilters&&tab==="rack"&&(
-        <div style={{background:T.card,padding:"14px 16px",borderBottom:`1px solid ${T.cardB}`,boxShadow:T.shadow,animation:"fadeIn 0.15s"}}>
-          <input value={fSearch} onChange={e=>setFSearch(e.target.value)} placeholder="🔍 Rechercher..." style={{...is,marginBottom:10,padding:"10px 14px",fontSize:14}}/>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
-            <Chip T={T} on={!fType} click={()=>setFType(null)} label="Tous"/>
-            {Object.entries(TYPES).map(([k,v])=><Chip T={T} key={k} on={fType===k} click={()=>setFType(f=>f===k?null:k)} label={v.icon+" "+v.label} c={v.color} n={stats.types[k]}/>)}
-          </div>
-          {caveRegs.length>0&&<div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
-            <Chip T={T} on={!fRegion} click={()=>setFRegion(null)} label="Toutes régions"/>
-            {caveRegs.map(r=><Chip T={T} key={r} on={fRegion===r} click={()=>setFRegion(f=>f===r?null:r)} label={r} n={stats.regions[r]}/>)}
-          </div>}
-          <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <Chip T={T} on={fApogee} click={()=>setFApogee(f=>!f)} label={"🎯 À boire "+yr} c="#2E7D32"/>
-            {isF&&<button onClick={()=>{setFType(null);setFRegion(null);setFSearch("");setFApogee(false);}} style={{fontSize:12,color:T.ink4,background:"none",textDecoration:"underline",marginLeft:"auto",border:"none"}}>Effacer</button>}
-          </div>
+      {shF&&tab==="cave"&&<div style={{background:T.card,padding:"12px 16px 14px",borderBottom:`1px solid ${T.cardB}`,boxShadow:T.sh,animation:"fadeIn 0.12s"}}>
+        <input value={fQ} onChange={e=>setFQ(e.target.value)} placeholder="\uD83D\uDD0D Rechercher..." style={{...is,marginBottom:10,padding:"10px 14px",fontSize:14}}/>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+          <Pill T={T} on={!fT} ck={()=>setFT(null)} lb="Tous"/>
+          {Object.entries(TP).map(([k,v])=><Pill T={T} key={k} on={fT===k} ck={()=>setFT(f=>f===k?null:k)} lb={v.ic+" "+v.l} c={v.c} n={stats.tp[k]}/>)}
         </div>
-      )}
-
-      <main style={{flex:1,overflowY:"auto",paddingBottom:76}}>
-        {/* ═══ RACK ═══ */}
-        {tab==="rack"&&(
-          <div style={{padding:"14px 8px"}}>
-            <div style={{background:RK.bg,borderRadius:14,padding:"8px 6px",boxShadow:RK.shadow,overflowX:"auto",position:"relative"}}>
-              {/* Texture */}
-              {RK.grain!=="none"&&<div style={{position:"absolute",inset:0,borderRadius:14,opacity:1,pointerEvents:"none",backgroundImage:RK.grain}}/>}
-              {/* Col headers */}
-              <div style={{display:"flex",paddingLeft:28,marginBottom:3,position:"relative"}}>
-                {Array.from({length:config.cols},(_,c)=><div key={c} style={{width:CW,minWidth:CW,textAlign:"center",fontSize:10,color:RK.labelC,fontWeight:700}}>{c+1}</div>)}
-              </div>
-              {/* Rows */}
-              {Array.from({length:config.rows},(_,r)=>
-                <div key={r} style={{display:"flex",alignItems:"center",position:"relative"}}>
-                  <div style={{width:26,textAlign:"center",fontSize:10,color:RK.labelC,fontWeight:700,flexShrink:0}}>{String.fromCharCode(65+r)}</div>
-                  {Array.from({length:config.cols},(_,c)=>{
-                    const key=ck(c,r),b=bottles[key],color=bColor(b);
-                    const filt=isF&&b&&!matchF(b);
-                    const eDim=isF&&!b;
-                    return(
-                      <div key={key} className="rack-cell"
-                        onClick={()=>{setForm(ef());setModal({type:b?"detail":"add",cell:key});}}
-                        style={{
-                          width:CW,height:CH,minWidth:CW,cursor:"pointer",
-                          border:`1px solid ${RK.cellBorder}`,
-                          background:RK.cellBg,
-                          boxShadow:RK.cellShadow,
-                          opacity:filt?0.12:eDim?0.4:1,
-                          display:"flex",alignItems:"center",justifyContent:"center",
-                          position:"relative",overflow:"hidden",
-                        }}>
-                        {b?(
-                          /* ═══ FILLED CELL: photo or colored tag ═══ */
-                          b.image?(
-                            <div style={{width:"100%",height:"100%",position:"relative"}}>
-                              <img src={b.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.85}}
-                                onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="flex";}}/>
-                              <div style={{display:"none",width:"100%",height:"100%",alignItems:"center",justifyContent:"center",position:"absolute",inset:0,background:color}}>
-                                <span style={{color:"#fff",fontSize:11,fontWeight:700}}>{b.vintage?String(b.vintage).slice(2):TYPES[b.type]?.icon}</span>
-                              </div>
-                              {/* Year overlay */}
-                              <div style={{position:"absolute",bottom:1,right:2,background:"rgba(0,0,0,0.65)",color:"#fff",fontSize:9,fontWeight:700,padding:"1px 4px",borderRadius:3,lineHeight:1.2}}>
-                                {b.vintage?String(b.vintage).slice(2):""}
-                              </div>
-                              {/* Type dot */}
-                              <div style={{position:"absolute",top:2,left:2,width:8,height:8,borderRadius:"50%",background:color,border:"1px solid rgba(255,255,255,0.5)"}}/>
-                            </div>
-                          ):(
-                            /* No image — colored cell */
-                            <div style={{width:"100%",height:"100%",background:`radial-gradient(ellipse at 40% 35%,${color}CC,${color}88)`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
-                              <span style={{color:"rgba(255,255,255,0.9)",fontSize:12,fontWeight:800,textShadow:"0 1px 3px rgba(0,0,0,0.4)"}}>{b.vintage?String(b.vintage).slice(2):""}</span>
-                              <div style={{position:"absolute",top:2,right:3,fontSize:8}}>{TYPES[b.type]?.icon}</div>
-                            </div>
-                          )
-                        ):(
-                          /* Empty cell */
-                          <div style={{width:16,height:16,border:`1.5px dashed rgba(150,130,100,0.15)`,borderRadius:"50%"}}/>
-                        )}
-                      </div>
-                    );
-                  })}
+        {regs.length>0&&<div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+          <Pill T={T} on={!fR} ck={()=>setFR(null)} lb="R\u00e9gions"/>
+          {regs.map(r=><Pill T={T} key={r} on={fR===r} ck={()=>setFR(f=>f===r?null:r)} lb={r} n={stats.rg[r]}/>)}
+        </div>}
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <Pill T={T} on={fA} ck={()=>setFA(f=>!f)} lb={"\uD83C\uDFAF "+yr} c="#2E7D32"/>
+          {isF&&<button onClick={()=>{setFT(null);setFR(null);setFQ("");setFA(false)}} style={{fontSize:12,color:T.ink4,background:"none",textDecoration:"underline",marginLeft:"auto",border:"none"}}>Effacer</button>}
+        </div>
+      </div>}
+      <main style={{flex:1,overflowY:"auto",paddingBottom:80}}>
+        {tab==="cave"&&<>
+          {firstE()&&<div style={{padding:"12px 16px 0"}}><button onClick={()=>{const c=firstE();if(c){setFrm(ef());setMdl({type:"add",cell:c})}else flash("Cave pleine !")}} style={{width:"100%",padding:"14px",borderRadius:14,fontSize:15,fontWeight:600,background:T.accent,color:T.accentT,boxShadow:`0 4px 16px ${T.accent}44`,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>+ Ajouter une bouteille</button></div>}
+          {cfg.view==="list"&&<div style={{padding:"12px 16px"}}>
+            {stats.n===0&&<div style={{textAlign:"center",padding:"60px 20px",color:T.ink4}}><div style={{fontSize:56,marginBottom:16}}>{TP.rouge.ic}</div><div style={{fontSize:18,fontWeight:500,marginBottom:6}}>Votre cave est vide</div><div style={{fontSize:14}}>Ajoutez votre premi\u00e8re bouteille !</div></div>}
+            {Object.entries(bts).filter(([,b])=>!isF||mF(b)).map(([key,b],i)=>{const tc=TP[b.type]||TP.rouge,color=bCol(b),atA=b.apogee_start&&b.apogee_end&&yr>=b.apogee_start&&yr<=b.apogee_end;
+              return(<div key={key} onClick={()=>setMdl({type:"detail",cell:key})} style={{display:"flex",gap:14,padding:14,borderRadius:16,background:T.card,border:`1px solid ${T.cardB}`,marginBottom:10,boxShadow:T.sh,cursor:"pointer",animation:`fadeIn 0.2s ${i*0.03}s both`,position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",left:0,top:0,bottom:0,width:4,background:color,borderRadius:"16px 0 0 16px"}}/>
+                <div style={{width:56,height:80,borderRadius:10,flexShrink:0,overflow:"hidden",marginLeft:4,background:b.image?"transparent":tc.gd,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  {b.image?<img src={b.image} alt="" style={{width:"100%",height:"100%",objectFit:"contain"}} onError={e=>{e.target.style.display="none";e.target.parentElement.style.background=tc.gd}}/>:<span style={{fontSize:28,filter:"brightness(2) saturate(0)"}}>{tc.ic}</span>}
                 </div>
-              )}
+                <div style={{flex:1,minWidth:0,display:"flex",flexDirection:"column",justifyContent:"center"}}>
+                  <div style={{fontSize:15,fontWeight:600,lineHeight:1.3,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.name}</div>
+                  {b.winery&&<div style={{fontSize:12,color:T.ink4,marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.winery}</div>}
+                  <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",fontSize:12}}>
+                    {b.vintage&&<span style={{fontWeight:600,color:T.gold}}>{b.vintage}</span>}
+                    <span style={{color:T.ink3}}>{b.region}</span>
+                    <span style={{background:cfg.colorTheme==="dark"?tc.dk:tc.lt,color:tc.c,padding:"1px 8px",borderRadius:10,fontSize:11,fontWeight:500}}>{tc.ic} {tc.l}</span>
+                  </div>
+                  <div style={{display:"flex",gap:8,marginTop:4,alignItems:"center",fontSize:12}}>
+                    {b.rating&&<span style={{color:T.gold,fontWeight:600}}>{"\u2605"} {b.rating}</span>}
+                    {b.price&&<span style={{color:T.ink4}}>{b.price}</span>}
+                    {atA&&<span style={{color:T.okT,fontWeight:600,fontSize:11}}>{"\uD83C\uDFAF"} Apog\u00e9e</span>}
+                  </div>
+                </div>
+                <div style={{fontSize:11,color:T.ink4,fontWeight:500,alignSelf:"flex-start",marginTop:2}}>{parseInt(key.split("-")[0])+1}{String.fromCharCode(65+parseInt(key.split("-")[1]))}</div>
+              </div>)})}
+          </div>}
+          {cfg.view==="rack"&&<div style={{padding:"14px 8px"}}>
+            <div style={{background:RK.bg,borderRadius:14,padding:"6px 4px",boxShadow:"0 6px 24px rgba(0,0,0,0.3)",overflowX:"auto",position:"relative"}}>
+              {RK.gr!=="none"&&<div style={{position:"absolute",inset:0,borderRadius:14,pointerEvents:"none",backgroundImage:RK.gr}}/>}
+              <div style={{display:"flex",paddingLeft:24,marginBottom:2,position:"relative"}}>{Array.from({length:cfg.cols},(_,c)=><div key={c} style={{width:CW,minWidth:CW,textAlign:"center",fontSize:9,color:RK.lbl,fontWeight:700}}>{c+1}</div>)}</div>
+              {Array.from({length:cfg.rows},(_,r)=><div key={r} style={{display:"flex",alignItems:"center"}}>
+                <div style={{width:22,textAlign:"center",fontSize:9,color:RK.lbl,fontWeight:700,flexShrink:0}}>{String.fromCharCode(65+r)}</div>
+                {Array.from({length:cfg.cols},(_,c)=>{const key=ck(c,r),b=bts[key],color=bCol(b),filt=isF&&b&&!mF(b),eDim=isF&&!b;
+                  return<div key={key} onClick={()=>{if(b)setMdl({type:"detail",cell:key});else{setFrm(ef());setMdl({type:"add",cell:key})}}}
+                    style={{width:CW,height:CH,minWidth:CW,cursor:"pointer",border:`1px solid ${RK.brd}`,background:"rgba(0,0,0,0.12)",boxShadow:RK.shd,opacity:filt?0.12:eDim?0.4:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    {b?<div style={{width:CW-8,height:CH-8,borderRadius:6,background:color||"#555",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"inset 0 -2px 4px rgba(0,0,0,0.3),0 1px 3px rgba(0,0,0,0.2)",position:"relative",overflow:"hidden"}}>
+                      {b.image&&<img src={b.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.8,borderRadius:6}} onError={e=>{e.target.style.display="none"}}/>}
+                      <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{fontSize:10,fontWeight:800,color:"#fff",textShadow:"0 1px 3px rgba(0,0,0,0.7)"}}>{b.vintage?String(b.vintage).slice(2):""}</span></div>
+                    </div>:<div style={{width:14,height:14,border:"1.5px dashed rgba(150,120,80,0.12)",borderRadius:"50%"}}/>}</div>})}
+              </div>)}
             </div>
-            {/* Legend */}
-            {stats.total>0&&<div style={{display:"flex",gap:12,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}>
-              {Object.entries(TYPES).map(([k,v])=>stats.types[k]?<div key={k} style={{display:"flex",alignItems:"center",gap:4,fontSize:12,color:T.ink3}}>
-                <div style={{width:10,height:10,borderRadius:3,background:v.color}}/>{v.label} ({stats.types[k]})
-              </div>:null)}
-            </div>}
-          </div>
-        )}
-
-        {/* ═══ STATS ═══ */}
-        {tab==="stats"&&(
-          <div style={{padding:"20px 16px",animation:"fadeIn 0.2s"}}>
-            <h2 style={{fontSize:26,marginBottom:20,color:T.accent}}>Statistiques</h2>
-            {stats.total===0?<div style={{textAlign:"center",padding:"50px 20px",color:T.ink4}}><div style={{fontSize:48,marginBottom:16}}>🍇</div><div style={{fontSize:16,fontWeight:500}}>Cave vide</div></div>:<>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:24}}>
-                <MC T={T} i="🍾" v={stats.total} l="Bouteilles"/>
-                <MC T={T} i="📊" v={Math.round(stats.total/cap*100)+"%"} l="Remplissage"/>
-                {stats.avgRating&&<MC T={T} i="⭐" v={stats.avgRating} l="Note moyenne"/>}
-                {stats.totalValue!=null&&<MC T={T} i="💰" v={Math.round(stats.totalValue)+"€"} l="Valeur"/>}
-              </div>
-              <CrdS T={T} title="Par type">{Object.entries(TYPES).map(([k,v])=>{const n=stats.types[k]||0;if(!n)return null;const p=Math.round(n/stats.total*100);
-                return<div key={k} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-                  <div style={{width:36,height:36,borderRadius:"50%",background:config.colorTheme==="dark"?v.dark:v.light,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{v.icon}</div>
-                  <div style={{flex:1}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:14,fontWeight:600}}>{v.label}</span><span style={{fontSize:13,color:T.ink3}}>{n} · {p}%</span></div>
-                    <div style={{height:7,background:T.bg2,borderRadius:4,overflow:"hidden"}}><div style={{height:"100%",width:p+"%",background:v.color,borderRadius:4,transition:"width 0.6s"}}/></div></div></div>})}</CrdS>
-              <CrdS T={T} title="Par région">{Object.entries(stats.regions).sort((a,b)=>b[1]-a[1]).map(([r,n])=>
-                <div key={r} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${T.bg2}`}}>
-                  <span style={{fontSize:14,color:T.ink2}}>{r}</span>
-                  <div style={{background:T.accent,color:T.accentT,fontSize:12,fontWeight:700,padding:"2px 10px",borderRadius:12}}>{n}</div></div>)}</CrdS>
-              {Object.keys(stats.vintages).length>0&&<CrdS T={T} title="Par millésime"><div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                {Object.entries(stats.vintages).sort((a,b)=>Number(b[0])-Number(a[0])).slice(0,15).map(([y,n])=>
-                  <div key={y} style={{background:T.bg2,padding:"5px 12px",borderRadius:18,fontSize:13,fontWeight:500,color:T.ink2}}>{y} <span style={{fontWeight:700,color:T.accent}}>×{n}</span></div>
-                )}</div></CrdS>}
-              {allB.some(b=>b.apogee_start||b.apogee_end)&&<CrdS T={T} title={"🎯 À déguster en "+yr}>
-                {allB.filter(b=>{const s=b.apogee_start||0,e=b.apogee_end||9999;return yr>=s&&yr<=e;}).map((b,i)=>
-                  <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:`1px solid ${T.bg2}`}}>
-                    <div><div style={{fontSize:14,fontWeight:600}}>{b.name}</div><div style={{fontSize:12,color:T.ink4}}>{b.vintage&&b.vintage+" · "}{b.region}</div></div>
-                    <div style={{fontSize:12,fontWeight:600,color:T.successT,background:T.successBg,padding:"3px 10px",borderRadius:12}}>{b.apogee_start}–{b.apogee_end}</div></div>)}</CrdS>}
-            </>}
-          </div>
-        )}
-
-        {/* ═══ SETTINGS ═══ */}
-        {tab==="settings"&&(
-          <div style={{padding:"20px 16px",animation:"fadeIn 0.2s"}}>
-            <h2 style={{fontSize:26,marginBottom:20,color:T.accent}}>Réglages</h2>
-
-            <CrdS T={T} title="🎨 Apparence">
-              <div style={{marginBottom:14}}>
-                <div style={{fontSize:12,color:T.ink4,marginBottom:6,fontWeight:600}}>Couleurs</div>
-                <div style={{display:"flex",gap:8}}>
-                  {Object.entries(COLORS).map(([k,v])=><button key={k} onClick={()=>{const c={...config,colorTheme:k};setConfig(c);setEditCfg(c);}}
-                    style={{flex:1,padding:"12px",borderRadius:10,fontSize:13,fontWeight:600,background:config.colorTheme===k?T.accent:T.bg2,color:config.colorTheme===k?T.accentT:T.ink3,border:`1.5px solid ${config.colorTheme===k?T.accent:T.cardB}`}}>
-                    {k==="light"?"☀️ Clair":"🌙 Sombre"}</button>)}
-                </div>
-              </div>
-              <div>
-                <div style={{fontSize:12,color:T.ink4,marginBottom:6,fontWeight:600}}>Style du rack</div>
-                <div style={{display:"flex",gap:8}}>
-                  {Object.entries(RACKS).map(([k,v])=><button key={k} onClick={()=>{const c={...config,rackTheme:k};setConfig(c);setEditCfg(c);}}
-                    style={{flex:1,padding:"12px 8px",borderRadius:10,fontSize:12,fontWeight:600,background:config.rackTheme===k?T.accent:T.bg2,color:config.rackTheme===k?T.accentT:T.ink3,border:`1.5px solid ${config.rackTheme===k?T.accent:T.cardB}`}}>
-                    {v.emoji} {v.name}</button>)}
-                </div>
-              </div>
-            </CrdS>
-
-            <CrdS T={T} title="📐 Dimensions">
-              <div style={{display:"flex",gap:14,alignItems:"center"}}>
-                <div style={{flex:1}}><label style={{fontSize:12,color:T.ink4,marginBottom:4,display:"block",fontWeight:600}}>Colonnes</label>
-                  <input type="number" min={1} max={20} value={editCfg.cols} style={is} onChange={e=>setEditCfg(c=>({...c,cols:Math.max(1,Math.min(20,parseInt(e.target.value)||1))}))}/></div>
-                <div style={{color:T.ink4,fontSize:22,paddingTop:18}}>×</div>
-                <div style={{flex:1}}><label style={{fontSize:12,color:T.ink4,marginBottom:4,display:"block",fontWeight:600}}>Rangées</label>
-                  <input type="number" min={1} max={20} value={editCfg.rows} style={is} onChange={e=>setEditCfg(c=>({...c,rows:Math.max(1,Math.min(20,parseInt(e.target.value)||1))}))}/></div>
-              </div>
-              <div style={{fontSize:13,color:T.ink4,marginTop:8}}>Capacité : <strong style={{color:T.ink2}}>{editCfg.cols*editCfg.rows}</strong></div>
-            </CrdS>
-
-            <CrdS T={T} title="🔍 Recherche Vivino">
-              <input value={editCfg.backendUrl} style={is} onChange={e=>setEditCfg(c=>({...c,backendUrl:e.target.value}))} placeholder="https://votre-app.onrender.com"/>
-              <div style={{marginTop:10,padding:14,borderRadius:10,background:T.bg2,fontSize:13,color:T.ink3,lineHeight:1.7}}>
-                <strong style={{color:T.ink2}}>⚡ Comment activer la recherche :</strong><br/>
-                1. Allez sur <a href="https://render.com/deploy?repo=https://github.com/belthomas1-del/ma-cave" target="_blank" style={{color:T.accent,fontWeight:600}}>render.com/deploy</a><br/>
-                2. Cliquez "Deploy" (gratuit)<br/>
-                3. Copiez l'URL ici (ex: https://ma-cave-api.onrender.com)<br/>
-                <span style={{fontSize:11,color:T.ink4}}>Premier appel ~30s (le serveur gratuit dort)</span>
-              </div>
-              {editCfg.backendUrl&&<button onClick={async()=>{
-                try{const r=await fetch(editCfg.backendUrl+"/health",{signal:AbortSignal.timeout(15000)});
-                  if(r.ok){flash("✅ Serveur connecté !");return;}}catch{}flash("❌ Serveur injoignable (attendez 30s si premier lancement)");
-              }} style={{marginTop:10,padding:"11px",borderRadius:10,fontSize:14,fontWeight:500,background:T.bg2,color:T.ink2,width:"100%"}}>🔌 Tester</button>}
-            </CrdS>
-
-            <CrdS T={T} title="💾 Données">
-              <div style={{display:"flex",gap:10}}>
-                <Btn T={T} v="light" s={{flex:1}} onClick={()=>{const d=JSON.stringify({bottles,config},null,2);const bl=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(bl);const a=document.createElement("a");a.href=u;a.download="ma-cave-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(u);flash("Export OK");}}>📤 Exporter</Btn>
-                <Btn T={T} v="light" s={{flex:1}} onClick={()=>{const i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.bottles)setBottles(d.bottles);if(d.config){setConfig(d.config);setEditCfg(d.config);}flash("Import OK");}catch{flash("Fichier invalide");}};r.readAsText(f);};i.click();}}>📥 Importer</Btn>
-              </div>
-            </CrdS>
-
-            <div style={{display:"flex",gap:10,marginTop:20}}>
-              <Btn T={T} v="primary" s={{flex:1}} onClick={()=>{setConfig({...editCfg,colorTheme:config.colorTheme,rackTheme:config.rackTheme});flash("Sauvegardé !");setTab("rack");}}>💾 Sauvegarder</Btn>
-              <Btn T={T} v="danger" onClick={()=>{if(confirm("Vider toute la cave ?")){setBottles({});flash("Cave vidée");setTab("rack");}}}>🗑</Btn>
+            <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}>{Object.entries(TP).map(([k,v])=>stats.tp[k]?<div key={k} style={{display:"flex",alignItems:"center",gap:4,fontSize:11,color:T.ink3}}><div style={{width:10,height:10,borderRadius:3,background:v.c}}/>{v.l} ({stats.tp[k]})</div>:null)}</div>
+          </div>}
+        </>}
+        {tab==="stats"&&<div style={{padding:"20px 16px",animation:"fadeIn 0.15s"}}>
+          <h2 style={{fontSize:26,marginBottom:20,color:T.accent,fontWeight:600}}>Statistiques</h2>
+          {stats.n===0?<div style={{textAlign:"center",padding:"60px 20px",color:T.ink4}}><div style={{fontSize:48,marginBottom:16}}>{"\uD83C\uDF47"}</div><div style={{fontSize:16}}>Cave vide</div></div>:<>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:22}}>
+              <MC T={T} i={"\uD83C\uDF7E"} v={stats.n} l="Bouteilles"/><MC T={T} i={"\uD83D\uDCCA"} v={Math.round(stats.n/cap*100)+"%"} l="Remplissage"/>
+              {stats.avgR&&<MC T={T} i={"\u2B50"} v={stats.avgR} l="Note moyenne"/>}
+              {stats.totV!=null&&<MC T={T} i={"\uD83D\uDCB0"} v={Math.round(stats.totV)+"\u20ac"} l="Valeur"/>}
             </div>
+            <Sec T={T} t="Par type">{Object.entries(TP).map(([k,v])=>{const n=stats.tp[k]||0;if(!n)return null;const p=Math.round(n/stats.n*100);
+              return<div key={k} style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+                <div style={{width:36,height:36,borderRadius:10,background:cfg.colorTheme==="dark"?v.dk:v.lt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{v.ic}</div>
+                <div style={{flex:1}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:14,fontWeight:600}}>{v.l}</span><span style={{fontSize:13,color:T.ink3}}>{n} \u00b7 {p}%</span></div>
+                  <div style={{height:6,background:T.bg2,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:p+"%",background:v.c,borderRadius:3}}/></div></div></div>})}</Sec>
+            <Sec T={T} t="Par r\u00e9gion">{Object.entries(stats.rg).sort((a,b)=>b[1]-a[1]).map(([r,n])=><div key={r} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${T.bg2}`}}><span style={{fontSize:14,color:T.ink2}}>{r}</span><div style={{background:T.accent,color:T.accentT,fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:10}}>{n}</div></div>)}</Sec>
+          </>}
+        </div>}
+        {tab==="settings"&&<div style={{padding:"20px 16px",animation:"fadeIn 0.15s"}}>
+          <h2 style={{fontSize:26,marginBottom:20,color:T.accent,fontWeight:600}}>R\u00e9glages</h2>
+          <Sec T={T} t="\uD83C\uDFA8 Apparence">
+            <div style={{marginBottom:14}}><div style={{fontSize:12,color:T.ink4,marginBottom:6,fontWeight:600}}>Couleurs</div>
+              <div style={{display:"flex",gap:8}}>{[["light","\u2600\ufe0f Clair"],["dark","\uD83C\uDF19 Sombre"]].map(([k,l])=><button key={k} onClick={()=>{const c={...cfg,colorTheme:k};setCfg(c);setEc(c)}} style={{flex:1,padding:12,borderRadius:12,fontSize:13,fontWeight:600,background:cfg.colorTheme===k?T.accent:T.bg2,color:cfg.colorTheme===k?T.accentT:T.ink3,border:"none"}}>{l}</button>)}</div></div>
+            <div><div style={{fontSize:12,color:T.ink4,marginBottom:6,fontWeight:600}}>Rack</div>
+              <div style={{display:"flex",gap:8}}>{Object.entries(RKS).map(([k,v])=><button key={k} onClick={()=>{const c={...cfg,rackTheme:k};setCfg(c);setEc(c)}} style={{flex:1,padding:12,borderRadius:12,fontSize:12,fontWeight:600,background:cfg.rackTheme===k?T.accent:T.bg2,color:cfg.rackTheme===k?T.accentT:T.ink3,border:"none"}}>{v.em} {v.name}</button>)}</div></div>
+          </Sec>
+          <Sec T={T} t="\uD83D\uDCD0 Dimensions">
+            <div style={{display:"flex",gap:14,alignItems:"center"}}>
+              <div style={{flex:1}}><label style={{fontSize:12,color:T.ink4,marginBottom:4,display:"block",fontWeight:600}}>Colonnes</label><input type="number" min={1} max={20} value={ec.cols} style={is} onChange={e=>setEc(c=>({...c,cols:Math.max(1,Math.min(20,parseInt(e.target.value)||1))}))}/></div>
+              <div style={{color:T.ink4,fontSize:20,paddingTop:18}}>{"\u00d7"}</div>
+              <div style={{flex:1}}><label style={{fontSize:12,color:T.ink4,marginBottom:4,display:"block",fontWeight:600}}>Rang\u00e9es</label><input type="number" min={1} max={20} value={ec.rows} style={is} onChange={e=>setEc(c=>({...c,rows:Math.max(1,Math.min(20,parseInt(e.target.value)||1))}))}/></div>
+            </div>
+          </Sec>
+          <Sec T={T} t="\uD83D\uDD0D Serveur Vivino">
+            <input value={ec.backendUrl} style={is} onChange={e=>setEc(c=>({...c,backendUrl:e.target.value}))} placeholder="https://ma-cave-api.onrender.com"/>
+            <div style={{marginTop:10,padding:14,borderRadius:12,background:T.bg2,fontSize:13,color:T.ink3,lineHeight:1.7}}>
+              <strong style={{color:T.ink2}}>Premier appel \u2248 30-50s</strong> (serveur gratuit en veille).
+              {cfg.backendUrl&&<><br/><a href={cfg.backendUrl+"/debug?q=margaux"} target="_blank" style={{color:T.accent,fontWeight:600}}>{"\uD83D\uDD2C"} Page diagnostic</a></>}
+            </div>
+            {ec.backendUrl&&<button onClick={async()=>{try{const r=await fetch(ec.backendUrl+"/health",{signal:AbortSignal.timeout(20000)});if(r.ok){flash("\u2705 Connect\u00e9");return}}catch{}flash("\u23f3 En d\u00e9marrage... 30s")}} style={{marginTop:10,padding:12,borderRadius:12,fontSize:14,fontWeight:500,background:T.bg2,color:T.ink2,width:"100%",border:"none"}}>{"\uD83D\uDD0C"} Tester</button>}
+          </Sec>
+          <Sec T={T} t="\uD83D\uDCBE Donn\u00e9es">
+            <div style={{display:"flex",gap:10}}>
+              <Btn T={T} v="lt" s={{flex:1}} ck={()=>{const d=JSON.stringify({bottles:bts,config:cfg},null,2);const bl=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(bl);const a=document.createElement("a");a.href=u;a.download="ma-cave-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(u);flash("Export OK")}}>{"\uD83D\uDCE4"} Exporter</Btn>
+              <Btn T={T} v="lt" s={{flex:1}} ck={()=>{const i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.bottles)setBts(d.bottles);if(d.config){setCfg(d.config);setEc(d.config)}flash("Import OK")}catch{flash("Erreur")}};r.readAsText(f)};i.click()}}>{"\uD83D\uDCE5"} Importer</Btn>
+            </div>
+          </Sec>
+          <div style={{display:"flex",gap:10,marginTop:20}}>
+            <Btn T={T} v="pr" s={{flex:1}} ck={()=>{setCfg(c=>({...c,...ec,colorTheme:cfg.colorTheme,rackTheme:cfg.rackTheme}));flash("Sauvegard\u00e9 !");setTab("cave")}}>{"\uD83D\uDCBE"} Sauvegarder</Btn>
+            <Btn T={T} v="dn" ck={()=>{if(confirm("Vider la cave ?")){setBts({});flash("Vid\u00e9e")}}}>{"\uD83D\uDDD1"}</Btn>
           </div>
-        )}
+        </div>}
       </main>
-
-      {/* NAV */}
-      <nav style={{position:"fixed",bottom:0,left:0,right:0,zIndex:50,background:T.nav,borderTop:`1px solid ${T.navB}`,display:"flex",paddingBottom:"max(6px,env(safe-area-inset-bottom,0px))",boxShadow:"0 -2px 12px rgba(0,0,0,0.06)"}}>
-        <TabBtn T={T} on={tab==="rack"} icon="⊞" label="Cave" click={()=>setTab("rack")}/>
-        <TabBtn T={T} on={tab==="stats"} icon="◎" label="Stats" click={()=>setTab("stats")}/>
-        <TabBtn T={T} on={tab==="settings"} icon="⚙" label="Réglages" click={()=>{setEditCfg(config);setTab("settings");}}/>
+      <nav style={{position:"fixed",bottom:0,left:0,right:0,zIndex:50,background:T.nav,borderTop:`1px solid ${T.navB}`,display:"flex",paddingBottom:"max(6px,env(safe-area-inset-bottom,0px))",boxShadow:"0 -2px 12px rgba(0,0,0,0.04)"}}>
+        <NB T={T} on={tab==="cave"} ic={TP.rouge.ic} lb="Cave" ck={()=>setTab("cave")}/>
+        <NB T={T} on={tab==="stats"} ic={"\uD83D\uDCCA"} lb="Stats" ck={()=>setTab("stats")}/>
+        <NB T={T} on={tab==="settings"} ic={"\u2699\ufe0f"} lb="R\u00e9glages" ck={()=>{setEc(cfg);setTab("settings")}}/>
       </nav>
 
-      {/* ADD MODAL */}
-      {modal?.type==="add"&&<Sheet T={T} onClose={closeModal}>
-        <SheetH T={T} title="Ajouter" sub={"Emplacement "+(parseInt(modal.cell.split("-")[0])+1)+String.fromCharCode(65+parseInt(modal.cell.split("-")[1]))} onClose={closeModal}/>
-        <div style={{display:"flex",gap:8,marginBottom:16}}>
-          <Tog T={T} on={!manual} click={()=>setManual(false)}>🔍 Vivino</Tog>
-          <Tog T={T} on={manual} click={()=>setManual(true)}>✏️ Manuel</Tog>
-        </div>
-        {!manual&&<>
+      {mdl?.type==="add"&&<Sht T={T} cls={clsM}>
+        <SHd T={T} t="Ajouter" s={"Emplacement "+(parseInt(mdl.cell.split("-")[0])+1)+String.fromCharCode(65+parseInt(mdl.cell.split("-")[1]))} cls={clsM}/>
+        <div style={{display:"flex",gap:8,marginBottom:16}}><Tg T={T} on={!man} ck={()=>setMan(false)}>{"\uD83D\uDD0D"} Vivino</Tg><Tg T={T} on={man} ck={()=>setMan(true)}>{"\u270f\ufe0f"} Manuel</Tg></div>
+        {!man&&<>
           <div style={{display:"flex",gap:8,marginBottom:12}}>
-            <input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runSearch()} placeholder="Château Margaux 2015..." style={{...is,flex:1,padding:"12px 14px",fontSize:14}}/>
-            <Btn T={T} v="primary" onClick={runSearch} disabled={searching} s={{minWidth:56,opacity:searching?0.5:1}}>{searching?"⏳":"OK"}</Btn>
+            <input value={qry} onChange={e=>setQry(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runS()} placeholder="Ch\u00e2teau Margaux 2015..." style={{...is,flex:1,padding:"12px 14px",fontSize:14}}/>
+            <Btn T={T} v="pr" ck={runS} dis={srch} s={{minWidth:56,opacity:srch?0.5:1}}>{srch?"\u23f3":"OK"}</Btn>
           </div>
-          {searching&&<div style={{textAlign:"center",padding:24,color:T.ink4}}><div style={{width:28,height:28,border:`3px solid ${T.bg3}`,borderTopColor:T.accent,borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 12px"}}/>{searchStatus==="backend"?"Recherche via serveur...":"Proxy CORS..."}</div>}
-          {debugLog.length>0&&<div style={{marginBottom:10,padding:10,borderRadius:8,background:T.bg2,fontSize:11,color:T.ink3,lineHeight:1.6,fontFamily:"monospace",maxHeight:90,overflowY:"auto"}}>{debugLog.map((l,i)=><div key={i}>{l}</div>)}</div>}
-          {searchErr&&<div style={{padding:12,borderRadius:10,fontSize:13,marginBottom:12,background:T.dangerBg,color:T.dangerT}}>{searchErr}</div>}
-          {!searching&&results.length>0&&<div style={{fontSize:12,marginBottom:10,color:T.successT,display:"flex",alignItems:"center",gap:6}}>
-            <span style={{width:6,height:6,borderRadius:"50%",background:"currentColor"}}/>{results.length} résultat{results.length>1?"s":""} via {searchStatus}
-          </div>}
-          {results.map((w,i)=><WineCard T={T} key={i} w={w} onClick={()=>addBottle(modal.cell,w)}/>)}
+          {srch&&<div style={{textAlign:"center",padding:24,color:T.ink4}}><div style={{width:28,height:28,border:`3px solid ${T.bg3}`,borderTopColor:T.accent,borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 12px"}}/>{srSt==="backend"?"Requ\u00eate serveur...":"Proxy..."}</div>}
+          {dbg.length>0&&<div style={{marginBottom:10,padding:10,borderRadius:10,background:T.bg2,fontSize:11,color:T.ink3,lineHeight:1.7,fontFamily:"monospace",maxHeight:100,overflowY:"auto"}}>{dbg.map((l,i)=><div key={i}>{l}</div>)}</div>}
+          {srEr&&<div style={{padding:12,borderRadius:12,fontSize:13,marginBottom:12,background:T.danBg,color:T.danT}}>{srEr}</div>}
+          {!srch&&res.length>0&&<div style={{fontSize:12,marginBottom:10,color:T.okT,display:"flex",alignItems:"center",gap:6}}><span style={{width:6,height:6,borderRadius:"50%",background:"currentColor"}}/>{res.length} r\u00e9sultat{res.length>1?"s":""}</div>}
+          {res.map((w,i)=><SrC T={T} key={i} w={w} ck={()=>addB(mdl.cell,w)}/>)}
         </>}
-        {manual&&<ManualForm T={T} form={form} setForm={setForm} regions={formRegs} is={is} onAdd={d=>addBottle(modal.cell,d)}/>}
-      </Sheet>}
+        {man&&<MnF T={T} f={frm} sF={setFrm} rg={fRegs} is={is} add={d=>addB(mdl.cell,d)}/>}
+      </Sht>}
 
-      {/* DETAIL MODAL */}
-      {modal?.type==="detail"&&bottles[modal.cell]&&(()=>{
-        const b=bottles[modal.cell],color=bColor(b),tc=TYPES[b.type]||TYPES.rouge;
-        const bgL=config.colorTheme==="dark"?tc.dark:tc.light;
-        return<Sheet T={T} onClose={closeModal} noPad>
-          <div style={{position:"relative",height:b.image?280:120,background:`linear-gradient(180deg,${bgL},${T.bg})`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-            {b.image?<img src={b.image} alt="" style={{maxHeight:260,maxWidth:"55%",objectFit:"contain",filter:"drop-shadow(0 10px 30px rgba(0,0,0,0.15))"}}/>:<div style={{fontSize:56,opacity:0.12}}>{tc.icon}</div>}
-            <button onClick={closeModal} style={{position:"absolute",top:14,right:14,width:36,height:36,borderRadius:"50%",background:T.card,backdropFilter:"blur(6px)",color:T.ink3,fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",border:"none"}}>✕</button>
-            <div style={{position:"absolute",top:14,left:14,background:T.card,backdropFilter:"blur(6px)",padding:"4px 12px",borderRadius:12,fontSize:12,color:T.ink3,fontWeight:600}}>📍 {parseInt(modal.cell.split("-")[0])+1}{String.fromCharCode(65+parseInt(modal.cell.split("-")[1]))}</div>
+      {mdl?.type==="detail"&&bts[mdl.cell]&&(()=>{const b=bts[mdl.cell],color=bCol(b),tc=TP[b.type]||TP.rouge,bgL=cfg.colorTheme==="dark"?tc.dk:tc.lt,atA=b.apogee_start&&b.apogee_end&&yr>=b.apogee_start&&yr<=b.apogee_end;
+        return<Sht T={T} cls={clsM} noPad>
+          <div style={{position:"relative",height:b.image?300:140,background:`linear-gradient(180deg,${bgL},${T.bg})`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+            {b.image?<img src={b.image} alt="" style={{maxHeight:280,maxWidth:"50%",objectFit:"contain",filter:"drop-shadow(0 12px 30px rgba(0,0,0,0.2))"}}/>:<div style={{fontSize:56,opacity:0.1}}>{tc.ic}</div>}
+            <button onClick={clsM} style={{position:"absolute",top:14,right:14,width:38,height:38,borderRadius:12,background:T.card,color:T.ink3,fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",border:"none",boxShadow:T.sh}}>{"\u2715"}</button>
           </div>
-          <div style={{padding:"16px 20px 28px"}}>
-            <div style={{display:"inline-flex",alignItems:"center",gap:6,marginBottom:10,background:bgL,padding:"5px 14px",borderRadius:20,fontSize:13,fontWeight:600,color:tc.color}}><div style={{width:9,height:9,borderRadius:"50%",background:color}}/>{tc.label} · {b.region}</div>
-            <h2 style={{fontSize:22,fontWeight:700,lineHeight:1.25,marginBottom:3,color:T.ink}}>{b.name}</h2>
+          <div style={{padding:"16px 20px 32px"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,marginBottom:10,background:bgL,padding:"5px 14px",borderRadius:12,fontSize:13,fontWeight:600,color:tc.c}}>{tc.ic} {tc.l} \u00b7 {b.region}</div>
+            {atA&&<span style={{display:"inline-flex",marginLeft:8,background:T.okBg,padding:"4px 12px",borderRadius:12,fontSize:12,fontWeight:600,color:T.okT}}>{"\uD83C\uDFAF"} Apog\u00e9e</span>}
+            <h2 style={{fontSize:24,fontWeight:600,lineHeight:1.25,marginBottom:3,marginTop:6}}>{b.name}</h2>
             {b.winery&&<div style={{fontSize:14,color:T.ink4,marginBottom:4}}>{b.winery}</div>}
-            {b.vintage&&<div style={{fontSize:17,color:T.gold,fontWeight:600,marginBottom:16}}>Millésime {b.vintage}</div>}
+            {b.vintage&&<div style={{fontSize:18,color:T.gold,fontWeight:600,marginBottom:16,fontFamily:"'Playfair Display',serif"}}>Mill\u00e9sime {b.vintage}</div>}
             {(b.rating||b.price)&&<div style={{display:"flex",gap:10,marginBottom:16}}>
-              {b.rating&&<div style={{flex:1,background:T.goldBg,padding:14,borderRadius:12,textAlign:"center"}}><div style={{fontSize:24,fontWeight:700,color:T.gold}}>★ {b.rating}</div><div style={{fontSize:11,color:T.ink4,marginTop:2}}>Vivino</div></div>}
-              {b.price&&<div style={{flex:1,background:T.bg2,padding:14,borderRadius:12,textAlign:"center"}}><div style={{fontSize:24,fontWeight:700,color:T.ink}}>{b.price}</div><div style={{fontSize:11,color:T.ink4,marginTop:2}}>Prix moyen</div></div>}
+              {b.rating&&<div style={{flex:1,background:T.goldBg,padding:14,borderRadius:14,textAlign:"center"}}><div style={{fontSize:26,fontWeight:700,color:T.gold}}>{"\u2605"} {b.rating}</div><div style={{fontSize:11,color:T.ink4,marginTop:2}}>Vivino</div></div>}
+              {b.price&&<div style={{flex:1,background:T.bg2,padding:14,borderRadius:14,textAlign:"center"}}><div style={{fontSize:26,fontWeight:700}}>{b.price}</div><div style={{fontSize:11,color:T.ink4,marginTop:2}}>Prix</div></div>}
             </div>}
-            {b.grape&&<InfoB T={T} l="CÉPAGE(S)" v={b.grape}/>}
-            {b.region_raw&&b.region_raw!==b.region&&<InfoB T={T} l="APPELLATION" v={b.region_raw}/>}
-            {(b.apogee_start||b.apogee_end)&&<InfoB T={T} l="APOGÉE" v={(b.apogee_start||"?")+" – "+(b.apogee_end||"?")} hl={yr>=(b.apogee_start||0)&&yr<=(b.apogee_end||9999)}/>}
-            {b.description&&<InfoB T={T} l="DESCRIPTION" v={b.description}/>}
-            {b.notes&&<InfoB T={T} l="MES NOTES" v={b.notes} ac/>}
-            {b.added&&<div style={{fontSize:12,color:T.ink4,marginTop:14}}>Ajouté le {new Date(b.added).toLocaleDateString("fr-FR")}</div>}
+            {b.grape&&<IB T={T} l="C\u00c9PAGE(S)" v={b.grape}/>}{b.region_raw&&b.region_raw!==b.region&&<IB T={T} l="APPELLATION" v={b.region_raw}/>}
+            {(b.apogee_start||b.apogee_end)&&<IB T={T} l="APOG\u00c9E" v={(b.apogee_start||"?")+" \u2013 "+(b.apogee_end||"?")} hl={atA}/>}
+            {b.notes&&<IB T={T} l="MES NOTES" v={b.notes} ac/>}
             <div style={{display:"flex",gap:8,marginTop:20}}>
-              {b.vivino_url&&<a href={b.vivino_url} target="_blank" rel="noopener noreferrer" style={{flex:1,textAlign:"center",padding:12,borderRadius:10,fontSize:14,fontWeight:500,textDecoration:"none",background:T.bg2,color:T.ink2}}>🔗 Vivino</a>}
-              <button onClick={()=>{if(confirm("Retirer ?"))removeBottle(modal.cell);}} style={{padding:"12px 20px",borderRadius:10,fontSize:14,fontWeight:500,background:T.dangerBg,color:T.dangerT,border:"none"}}>🗑 Retirer</button>
+              {b.vivino_url&&<a href={b.vivino_url} target="_blank" rel="noopener noreferrer" style={{flex:1,textAlign:"center",padding:12,borderRadius:12,fontSize:14,fontWeight:500,textDecoration:"none",background:T.bg2,color:T.ink2}}>{"\uD83D\uDD17"} Vivino</a>}
+              <button onClick={()=>{if(confirm("Retirer ?"))rmB(mdl.cell)}} style={{padding:"12px 20px",borderRadius:12,fontSize:14,fontWeight:500,background:T.danBg,color:T.danT,border:"none"}}>{"\uD83D\uDDD1"}</button>
             </div>
           </div>
-        </Sheet>;})()}
-
-      {toast&&<div style={{position:"fixed",bottom:80,left:"50%",transform:"translateX(-50%)",zIndex:200,background:T.accent,color:T.accentT,padding:"11px 26px",borderRadius:28,fontWeight:600,fontSize:14,animation:"popIn 0.2s",whiteSpace:"nowrap",boxShadow:"0 6px 24px rgba(0,0,0,0.25)"}}>{toast}</div>}
+        </Sht>})()}
+      {tst&&<div style={{position:"fixed",bottom:84,left:"50%",transform:"translateX(-50%)",zIndex:200,background:T.accent,color:T.accentT,padding:"10px 24px",borderRadius:24,fontWeight:600,fontSize:14,animation:"popIn 0.15s",whiteSpace:"nowrap",boxShadow:"0 6px 20px rgba(0,0,0,0.2)"}}>{tst}</div>}
     </div>
   );
 }
 
-/* ═══ UI COMPONENTS ═══ */
-function TabBtn({T,on,icon,label,click}){return<button onClick={click} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"10px 0 6px",background:"none",color:on?T.accent:T.ink4,fontSize:10,fontWeight:on?700:400,border:"none"}}><span style={{fontSize:20,lineHeight:1}}>{icon}</span>{label}</button>}
-function Chip({T,on,click,label,c,n}){const cl=c||T.accent;return<button onClick={click} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:on?600:400,fontFamily:"inherit",whiteSpace:"nowrap",background:on?cl:T.bg2,color:on?"#fff":T.ink3,border:"none"}}>{label}{n>0&&!on?` (${n})`:""}</button>}
-function Btn({T,v,children,s,...p}){const st={primary:{background:T.accent,color:T.accentT,padding:"13px 20px",borderRadius:12,fontSize:15,fontWeight:600},light:{background:T.bg2,color:T.ink2,padding:"13px 20px",borderRadius:12,fontSize:14,fontWeight:500},danger:{background:T.dangerBg,color:T.dangerT,padding:"13px 20px",borderRadius:12,fontSize:15,fontWeight:600}};return<button style={{...st[v],border:"none",...s}} {...p}>{children}</button>}
-function Sheet({T,children,onClose,noPad}){return<div onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",backdropFilter:"blur(8px)",zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center",animation:"fadeIn 0.12s"}}><div style={{width:"100%",maxWidth:500,maxHeight:"92vh",overflowY:"auto",background:T.bg,borderRadius:"22px 22px 0 0",padding:noPad?0:"20px 18px",boxShadow:"0 -8px 40px rgba(0,0,0,0.12)",animation:"slideUp 0.25s cubic-bezier(0.22,1,0.36,1)"}}>{children}</div></div>}
-function SheetH({T,title,sub,onClose}){return<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}><div><h2 style={{fontSize:22,fontWeight:700,color:T.accent}}>{title}</h2>{sub&&<div style={{fontSize:12,color:T.ink4,marginTop:3}}>{sub}</div>}</div><button onClick={onClose} style={{width:36,height:36,borderRadius:"50%",background:T.bg2,color:T.ink3,fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",border:"none"}}>✕</button></div>}
-function Tog({T,on,children,click}){return<button onClick={click} style={{flex:1,padding:11,borderRadius:10,fontSize:13,fontWeight:600,fontFamily:"inherit",background:on?T.accent:T.bg2,color:on?T.accentT:T.ink3,border:"none"}}>{children}</button>}
-function WineCard({T,w,onClick}){const tc=TYPES[w.type]||TYPES.rouge;return<div onClick={onClick} style={{display:"flex",gap:12,padding:12,borderRadius:14,cursor:"pointer",background:T.card,border:`1px solid ${T.cardB}`,marginBottom:8,boxShadow:T.shadow}}>
-  {w.image&&<img src={w.image} alt="" style={{width:44,height:66,objectFit:"contain",borderRadius:6,flexShrink:0,background:T.bg2}}/>}
-  <div style={{flex:1,minWidth:0}}>
-    <div style={{fontSize:14,fontWeight:600,color:T.ink,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.name}</div>
+function NB({T,on,ic,lb,ck}){return<button onClick={ck} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"10px 0 6px",background:"none",color:on?T.accent:T.ink4,fontSize:10,fontWeight:on?700:400,border:"none"}}><span style={{fontSize:18}}>{ic}</span>{lb}</button>}
+function Pill({T,on,ck,lb,c,n}){return<button onClick={ck} style={{padding:"5px 12px",borderRadius:20,fontSize:12,fontWeight:on?600:400,whiteSpace:"nowrap",background:on?(c||T.accent):T.bg2,color:on?"#fff":T.ink3,border:"none",fontFamily:"inherit"}}>{lb}{n>0&&!on?` (${n})`:""}</button>}
+function Btn({T,v,children,s,ck,dis}){const st={pr:{background:T.accent,color:T.accentT,padding:"13px 20px",borderRadius:12,fontSize:15,fontWeight:600},lt:{background:T.bg2,color:T.ink2,padding:"13px 20px",borderRadius:12,fontSize:14,fontWeight:500},dn:{background:T.danBg,color:T.danT,padding:"13px 20px",borderRadius:12,fontSize:15,fontWeight:600}};return<button onClick={ck} disabled={dis} style={{...st[v],border:"none",...s}}>{children}</button>}
+function Sht({T,children,cls,noPad}){return<div onClick={e=>{if(e.target===e.currentTarget)cls()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",backdropFilter:"blur(8px)",zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center",animation:"fadeIn 0.1s"}}><div style={{width:"100%",maxWidth:500,maxHeight:"92vh",overflowY:"auto",background:T.bg,borderRadius:"22px 22px 0 0",padding:noPad?0:"20px 18px",boxShadow:"0 -8px 40px rgba(0,0,0,0.12)",animation:"slideUp 0.25s cubic-bezier(0.22,1,0.36,1)"}}>{children}</div></div>}
+function SHd({T,t,s,cls}){return<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><div><h2 style={{fontSize:22,fontWeight:600,color:T.accent}}>{t}</h2>{s&&<div style={{fontSize:12,color:T.ink4,marginTop:3}}>{s}</div>}</div><button onClick={cls} style={{width:36,height:36,borderRadius:10,background:T.bg2,color:T.ink3,fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",border:"none"}}>{"\u2715"}</button></div>}
+function Tg({T,on,children,ck}){return<button onClick={ck} style={{flex:1,padding:11,borderRadius:12,fontSize:13,fontWeight:600,background:on?T.accent:T.bg2,color:on?T.accentT:T.ink3,border:"none",fontFamily:"inherit"}}>{children}</button>}
+function SrC({T,w,ck}){const tc=TP[w.type]||TP.rouge;return<div onClick={ck} style={{display:"flex",gap:12,padding:12,borderRadius:14,cursor:"pointer",background:T.card,border:`1px solid ${T.cardB}`,marginBottom:8,boxShadow:T.sh}}>
+  {w.image&&<img src={w.image} alt="" style={{width:46,height:68,objectFit:"contain",borderRadius:8,flexShrink:0,background:T.bg2}}/>}
+  <div style={{flex:1,minWidth:0}}><div style={{fontSize:14,fontWeight:600,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.name}</div>
     {w.winery&&<div style={{fontSize:12,color:T.ink4,marginBottom:3}}>{w.winery}</div>}
-    <div style={{fontSize:12,color:T.ink3,display:"flex",gap:6,flexWrap:"wrap"}}>{w.vintage&&<span>{w.vintage}</span>}{w.region&&<span>· {w.region}</span>}<span>· {tc.icon}</span></div>
-    <div style={{display:"flex",gap:8,marginTop:4,fontSize:12}}>{w.rating&&<span style={{color:T.gold,fontWeight:600}}>★ {w.rating}</span>}{w.price&&<span style={{color:T.ink4}}>{w.price}</span>}</div>
-  </div><div style={{color:T.accent,fontSize:24,alignSelf:"center",fontWeight:300,opacity:0.5}}>+</div></div>}
-
-function ManualForm({T,form,setForm,regions,is,onAdd}){return<div style={{display:"flex",flexDirection:"column",gap:12}}>
-  <Fl T={T} l="Nom *"><input value={form.name} style={is} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Château Margaux"/></Fl>
-  <div style={{display:"flex",gap:10}}>
-    <Fl T={T} l="Millésime" s={{flex:1}}><input type="number" style={is} value={form.vintage} onChange={e=>setForm(f=>({...f,vintage:e.target.value}))} placeholder="2020"/></Fl>
-    <Fl T={T} l="Type" s={{flex:1}}><select value={form.type} style={is} onChange={e=>{const t=e.target.value;setForm(f=>({...f,type:t,region:Object.keys(REG_C[t]||{})[0]||"Autre"}));}}>{Object.entries(TYPES).map(([k,v])=><option key={k} value={k}>{v.icon} {v.label}</option>)}</select></Fl>
-  </div>
-  <Fl T={T} l="Région"><div style={{display:"flex",gap:8}}>
-    <select value={regions.includes(form.region)?form.region:"__c"} style={{...is,flex:1}} onChange={e=>{if(e.target.value!=="__c")setForm(f=>({...f,region:e.target.value}));else setForm(f=>({...f,region:""}));}}>
-      {regions.map(r=><option key={r} value={r}>{r}</option>)}<option value="__c">✏️ Saisir</option></select>
-    {!regions.includes(form.region)&&<input value={form.region} style={{...is,flex:1}} onChange={e=>setForm(f=>({...f,region:e.target.value}))} placeholder="Nouvelle..."/>}
-  </div></Fl>
-  <div style={{display:"flex",gap:10}}>
-    <Fl T={T} l="Apogée début" s={{flex:1}}><input type="number" style={is} value={form.apogee_start} onChange={e=>setForm(f=>({...f,apogee_start:e.target.value}))} placeholder="2025"/></Fl>
-    <Fl T={T} l="Apogée fin" s={{flex:1}}><input type="number" style={is} value={form.apogee_end} onChange={e=>setForm(f=>({...f,apogee_end:e.target.value}))} placeholder="2035"/></Fl>
-  </div>
-  <Fl T={T} l="Image URL"><input style={is} value={form.image} onChange={e=>setForm(f=>({...f,image:e.target.value}))} placeholder="https://..."/></Fl>
-  <Fl T={T} l="Notes"><textarea rows={2} style={{...is,resize:"vertical"}} value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="Goût, accords..."/></Fl>
-  <Btn T={T} v="primary" disabled={!form.name.trim()} s={{marginTop:4,opacity:form.name.trim()?1:0.4}}
-    onClick={()=>onAdd({name:form.name,vintage:form.vintage?Number(form.vintage):null,type:form.type,region:form.region||"Autre",image:form.image||null,notes:form.notes||null,rating:null,price:null,vivino_url:null,apogee_start:form.apogee_start?Number(form.apogee_start):null,apogee_end:form.apogee_end?Number(form.apogee_end):null,winery:"",grape:null,description:null,region_raw:form.region||"Autre"})}>Ajouter</Btn>
-</div>}
+    <div style={{fontSize:12,color:T.ink3}}>{w.vintage&&w.vintage+" \u00b7 "}{w.region&&w.region+" \u00b7 "}{tc.ic}</div>
+    <div style={{display:"flex",gap:8,marginTop:4,fontSize:12}}>{w.rating&&<span style={{color:T.gold,fontWeight:600}}>{"\u2605"} {w.rating}</span>}{w.price&&<span style={{color:T.ink4}}>{w.price}</span>}</div>
+  </div><div style={{color:T.accent,fontSize:22,alignSelf:"center",opacity:0.4}}>+</div></div>}
+function MnF({T,f,sF,rg,is,add}){return<div style={{display:"flex",flexDirection:"column",gap:12}}>
+  <Fl T={T} l="Nom *"><input value={f.name} style={is} onChange={e=>sF(p=>({...p,name:e.target.value}))} placeholder="Ch\u00e2teau Margaux"/></Fl>
+  <div style={{display:"flex",gap:10}}><Fl T={T} l="Mill\u00e9sime" s={{flex:1}}><input type="number" style={is} value={f.vintage} onChange={e=>sF(p=>({...p,vintage:e.target.value}))} placeholder="2020"/></Fl>
+    <Fl T={T} l="Type" s={{flex:1}}><select value={f.type} style={is} onChange={e=>{const t=e.target.value;sF(p=>({...p,type:t,region:Object.keys(RC[t]||{})[0]||"Autre"}))}}>{Object.entries(TP).map(([k,v])=><option key={k} value={k}>{v.ic} {v.l}</option>)}</select></Fl></div>
+  <Fl T={T} l="R\u00e9gion"><div style={{display:"flex",gap:8}}>
+    <select value={rg.includes(f.region)?f.region:"_c"} style={{...is,flex:1}} onChange={e=>{if(e.target.value!=="_c")sF(p=>({...p,region:e.target.value}));else sF(p=>({...p,region:""}))}}>
+      {rg.map(r=><option key={r} value={r}>{r}</option>)}<option value="_c">{"\u270f\ufe0f"} Saisir</option></select>
+    {!rg.includes(f.region)&&<input value={f.region} style={{...is,flex:1}} onChange={e=>sF(p=>({...p,region:e.target.value}))} placeholder="Nouvelle..."/>}</div></Fl>
+  <div style={{display:"flex",gap:10}}><Fl T={T} l="Apog\u00e9e d\u00e9but" s={{flex:1}}><input type="number" style={is} value={f.apogee_start} onChange={e=>sF(p=>({...p,apogee_start:e.target.value}))} placeholder="2025"/></Fl>
+    <Fl T={T} l="Apog\u00e9e fin" s={{flex:1}}><input type="number" style={is} value={f.apogee_end} onChange={e=>sF(p=>({...p,apogee_end:e.target.value}))} placeholder="2035"/></Fl></div>
+  <Fl T={T} l="Image URL"><input style={is} value={f.image} onChange={e=>sF(p=>({...p,image:e.target.value}))} placeholder="https://..."/></Fl>
+  <Fl T={T} l="Notes"><textarea rows={2} style={{...is,resize:"vertical"}} value={f.notes} onChange={e=>sF(p=>({...p,notes:e.target.value}))} placeholder="Go\u00fbt, accords..."/></Fl>
+  <Btn T={T} v="pr" dis={!f.name.trim()} s={{marginTop:4,opacity:f.name.trim()?1:0.4}} ck={()=>add({name:f.name,vintage:f.vintage?Number(f.vintage):null,type:f.type,region:f.region||"Autre",image:f.image||null,notes:f.notes||null,rating:null,price:null,vivino_url:null,apogee_start:f.apogee_start?Number(f.apogee_start):null,apogee_end:f.apogee_end?Number(f.apogee_end):null,winery:"",grape:null,description:null,region_raw:f.region||"Autre"})}>Ajouter</Btn></div>}
 function Fl({T,l,children,s}){return<div style={s}><div style={{fontSize:12,color:T.ink4,marginBottom:5,fontWeight:600}}>{l}</div>{children}</div>}
-function InfoB({T,l,v,ac,hl}){return<div style={{marginBottom:10,padding:"10px 14px",borderRadius:10,background:ac?T.goldBg:hl?T.successBg:T.bg2,border:hl?`1px solid ${T.successT}33`:"none"}}><div style={{fontSize:10,fontWeight:700,letterSpacing:0.5,marginBottom:3,color:ac?T.gold:hl?T.successT:T.ink4}}>{l}</div><div style={{fontSize:13,color:T.ink2,lineHeight:1.5}}>{v}</div></div>}
-function MC({T,i,v,l}){return<div style={{background:T.card,borderRadius:14,padding:"18px 14px",textAlign:"center",boxShadow:T.shadow,border:`1px solid ${T.cardB}`}}><div style={{fontSize:14,marginBottom:6}}>{i}</div><div style={{fontSize:24,fontWeight:700,color:T.accent,fontFamily:"'Cormorant Garamond',serif"}}>{v}</div><div style={{fontSize:11,color:T.ink4,marginTop:4}}>{l}</div></div>}
-function CrdS({T,title,children}){return<div style={{marginBottom:20}}><h3 style={{fontSize:16,fontWeight:700,marginBottom:12,color:T.ink2}}>{title}</h3><div style={{background:T.card,borderRadius:14,padding:16,boxShadow:T.shadow,border:`1px solid ${T.cardB}`}}>{children}</div></div>}
+function IB({T,l,v,ac,hl}){return<div style={{marginBottom:10,padding:"10px 14px",borderRadius:12,background:ac?T.warnBg:hl?T.okBg:T.bg2}}><div style={{fontSize:10,fontWeight:700,letterSpacing:0.5,marginBottom:3,color:ac?T.gold:hl?T.okT:T.ink4}}>{l}</div><div style={{fontSize:13,color:T.ink2,lineHeight:1.5}}>{v}</div></div>}
+function MC({T,i,v,l}){return<div style={{background:T.card,borderRadius:14,padding:"16px 14px",textAlign:"center",boxShadow:T.sh,border:`1px solid ${T.cardB}`}}><div style={{fontSize:13,marginBottom:5}}>{i}</div><div style={{fontSize:24,fontWeight:700,color:T.accent,fontFamily:"'Playfair Display',serif"}}>{v}</div><div style={{fontSize:11,color:T.ink4,marginTop:3}}>{l}</div></div>}
+function Sec({T,t,children}){return<div style={{marginBottom:20}}><h3 style={{fontSize:16,fontWeight:600,marginBottom:10,color:T.ink2}}>{t}</h3><div style={{background:T.card,borderRadius:14,padding:16,boxShadow:T.sh,border:`1px solid ${T.cardB}`}}>{children}</div></div>}
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
