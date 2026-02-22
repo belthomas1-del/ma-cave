@@ -2,778 +2,1159 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0D0A0E">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#4A0E1B">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <title>Ma Cave</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      /* Warm parchment palette */
+      --cream: #FAF6F0;
+      --cream2: #F3EDE4;
+      --cream3: #E8DFD3;
+      --wood: #D4C4AA;
+      /* Wine colors */
+      --burgundy: #4A0E1B;
+      --burgundy-light: #6B1D2A;
+      --burgundy-soft: #8B3A4A;
+      /* Gold accent */
+      --gold: #B8860B;
+      --gold-light: #D4A424;
+      --gold-soft: #E8C868;
+      /* Text - HIGH CONTRAST on light bg */
+      --ink: #1A0A0E;
+      --ink2: #3D2027;
+      --ink3: #6B5055;
+      --ink4: #9A8488;
+      /* Utilities */
+      --shadow: 0 2px 12px rgba(74,14,27,0.08);
+      --shadow-lg: 0 8px 32px rgba(74,14,27,0.12);
+      --radius: 14px;
+      --safe-b: env(safe-area-inset-bottom, 0px);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      background: #0D0A0E; color: #E8DDD0;
-      font-family: 'Cormorant Garamond', Georgia, serif;
+    html { height: 100%; background: var(--cream); }
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
       -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
+      min-height: 100%; min-height: 100dvh;
+      font-size: 15px; line-height: 1.5;
     }
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #4A3A2A; border-radius: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    #root { min-height: 100vh; min-height: 100dvh; }
+    ::-webkit-scrollbar-thumb { background: var(--wood); border-radius: 4px; }
+    h1, h2, h3 { font-family: 'Libre Baskerville', 'Georgia', serif; color: var(--burgundy); }
+
+    input, select, textarea {
+      background: #fff; border: 1.5px solid var(--cream3);
+      color: var(--ink); padding: 12px 16px; border-radius: 10px;
+      font-family: inherit; font-size: 15px; width: 100%;
+      outline: none; transition: border 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--burgundy-soft);
+      box-shadow: 0 0 0 3px rgba(74,14,27,0.08);
+    }
+    select { appearance: auto; }
+    select option { background: #fff; }
+    button { font-family: inherit; cursor: pointer; border: none; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px) } to { opacity: 1; transform: translateY(0) } }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    @keyframes popIn { from { transform: scale(0.9); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+
+    /* Subtle paper grain */
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    }
+
+    /* Active states for mobile */
+    .cell-slot:active { transform: scale(0.92); }
+    .wine-card:active { background: var(--cream2) !important; }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}</script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+<div id="root"></div>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
 
-    // ════════════════════════════════════════════
-    //  CONFIG COULEURS / RÉGIONS
-    // ════════════════════════════════════════════
-    const REGIONS_ROUGE = {
-      "Bordeaux":"#6B1D2A","Bourgogne":"#8B2252","Rhône":"#5D1A1A","Loire":"#9B3D3D",
-      "Languedoc":"#7A2E2E","Sud-Ouest":"#6D3535","Beaujolais":"#A13044","Provence":"#843B3B",
-      "Corse":"#5A2020","Italie":"#7B2D3E","Espagne":"#6E2233","Autre":"#722F37"
+/* ══════════════════════════════════════════════════════════
+   WINE TYPES & COLORS
+   ══════════════════════════════════════════════════════════ */
+const TYPE_CFG = {
+  rouge:     { label: "Rouge",     icon: "🍷", baseColor: "#6B1D2A", lightBg: "#F5E8EB" },
+  blanc:     { label: "Blanc",     icon: "🥂", baseColor: "#B8860B", lightBg: "#FBF5E6" },
+  rose:      { label: "Rosé",      icon: "🌸", baseColor: "#C87088", lightBg: "#FCF0F3" },
+  petillant: { label: "Pétillant", icon: "✨", baseColor: "#D4AF37", lightBg: "#FDF8E8" },
+};
+
+// Default region colors per type (user can add any region)
+const DEFAULT_REGION_COLORS = {
+  rouge: {
+    "Bordeaux":"#4A0E1B","Bourgogne":"#6B1D35","Rhône":"#5C1A1A","Loire":"#8B3A3A",
+    "Languedoc":"#6E2828","Sud-Ouest":"#7A3535","Beaujolais":"#9B2845","Provence":"#7A3A3A",
+    "Corse":"#502020","Italie":"#6B2535","Espagne":"#5E1E2E","Autre":"#5A2525"
+  },
+  blanc: {
+    "Alsace":"#B8860B","Bourgogne":"#A07A10","Loire":"#8B7020","Bordeaux":"#957A15",
+    "Champagne":"#AA8A05","Jura":"#887020","Savoie":"#9A8530","Provence":"#A89028",
+    "Italie":"#9A8015","Espagne":"#8A7510","Autre":"#907818"
+  },
+  rose: {
+    "Provence":"#C06080","Loire":"#B87088","Languedoc":"#B06878","Rhône":"#A86070",
+    "Bordeaux":"#A05868","Corse":"#985868","Italie":"#C07888","Espagne":"#B06878","Autre":"#A86878"
+  },
+  petillant: {
+    "Champagne":"#D4AF37","Crémant d'Alsace":"#C0A030","Crémant de Bourgogne":"#B09528",
+    "Crémant de Loire":"#A89030","Prosecco":"#C8A830","Cava":"#B09525","Autre":"#B8A030"
+  }
+};
+
+function getBottleColor(b) {
+  if (!b) return null;
+  const typeColors = DEFAULT_REGION_COLORS[b.type] || DEFAULT_REGION_COLORS.rouge;
+  return typeColors[b.region] || TYPE_CFG[b.type]?.baseColor || "#6B1D2A";
+}
+
+/* ══════════════════════════════════════════════════════════
+   STORAGE & SEARCH
+   ══════════════════════════════════════════════════════════ */
+const SK = "cave-v4";
+const load = () => { try { return JSON.parse(localStorage.getItem(SK)) || {}; } catch { return {}; } };
+const save = (d) => { try { localStorage.setItem(SK, JSON.stringify(d)); } catch {} };
+
+const VIVINO_API = "https://www.vivino.com/api/explore/explore";
+
+function classifyType(id) { return { 1:"rouge",2:"blanc",3:"petillant",4:"rose",7:"rose" }[id] || "rouge"; }
+
+function mapRegion(name) {
+  if (!name) return "Autre";
+  const r = name.toLowerCase();
+  const m = {"bordeaux":"Bordeaux","bourgogne":"Bourgogne","burgundy":"Bourgogne","rhône":"Rhône","rhone":"Rhône",
+    "loire":"Loire","alsace":"Alsace","champagne":"Champagne","languedoc":"Languedoc","roussillon":"Languedoc",
+    "provence":"Provence","beaujolais":"Beaujolais","sud-ouest":"Sud-Ouest","south west":"Sud-Ouest",
+    "jura":"Jura","savoie":"Savoie","corse":"Corse","corsica":"Corse",
+    "toscana":"Italie","tuscany":"Italie","piemonte":"Italie","piedmont":"Italie","veneto":"Italie","sicilia":"Italie",
+    "rioja":"Espagne","ribera":"Espagne","priorat":"Espagne","castilla":"Espagne","navarra":"Espagne"};
+  for (const [k,v] of Object.entries(m)) if (r.includes(k)) return v;
+  // Return raw region name (allows custom/new regions)
+  return name.length > 2 ? name : "Autre";
+}
+
+function parseVivino(data) {
+  return (data?.explore_vintage?.matches || []).slice(0, 10).map(m => {
+    const v = m.vintage || {}, w = v.wine || {}, s = v.statistics || {};
+    let img = v.image?.location; if (img && !img.startsWith("http")) img = "https:" + img;
+    const region = w.region?.name || w.region?.country?.name || "";
+    const grapes = (w.grapes || []).map(g => g.name).filter(Boolean);
+    const price = m.price?.amount ? `${m.price.amount.toFixed(0)}€` : null;
+    return {
+      name: w.name || "Inconnu", winery: w.winery?.name || "",
+      vintage: v.year || null, type: classifyType(w.type_id),
+      region: mapRegion(region), region_raw: region,
+      rating: s.ratings_average ? Math.round(s.ratings_average * 10) / 10 : null,
+      price, image: img, grape: grapes.join(", ") || null,
+      description: w.description || null,
+      vivino_url: w.seo_name ? `https://www.vivino.com${w.seo_name}` : null,
+      added: null, notes: null, apogee_start: null, apogee_end: null
     };
-    const REGIONS_BLANC = {
-      "Alsace":"#C49A2B","Bourgogne":"#B89530","Loire":"#A89045","Bordeaux":"#AA8E3A",
-      "Champagne":"#C4A020","Jura":"#9E8840","Savoie":"#B5A050","Provence":"#C0A848",
-      "Italie":"#B89A35","Espagne":"#A88E30","Autre":"#B89838"
-    };
-    const REGIONS_ROSE = {
-      "Provence":"#D47A94","Loire":"#CC8898","Languedoc":"#C87888","Rhône":"#C0707E",
-      "Bordeaux":"#BA6878","Corse":"#B86878","Italie":"#D08090","Espagne":"#C87888","Autre":"#C47888"
-    };
-    const REGIONS_PETILLANT = {
-      "Champagne":"#D4AF37","Crémant d'Alsace":"#CAAA40","Crémant de Bourgogne":"#C0A538",
-      "Crémant de Loire":"#BBA040","Prosecco":"#D0B040","Cava":"#C5A535","Autre":"#C8A83C"
-    };
+  }).filter(r => r.name !== "Inconnu");
+}
 
-    const TYPE_CONFIG = {
-      rouge:     { label:"Rouge",     icon:"🍷", regions:REGIONS_ROUGE,     bg:"#2A0F15" },
-      blanc:     { label:"Blanc",     icon:"🥂", regions:REGIONS_BLANC,     bg:"#2A2410" },
-      rose:      { label:"Rosé",      icon:"🌸", regions:REGIONS_ROSE,      bg:"#2A1520" },
-      petillant: { label:"Pétillant", icon:"✨", regions:REGIONS_PETILLANT, bg:"#2A2515" }
-    };
+async function searchWine(query, backendUrl, onStatus) {
+  const vivinoUrl = `${VIVINO_API}?q=${encodeURIComponent(query)}&country_code=FR&currency_code=EUR&language=fr&page=1&price_range_min=0&price_range_max=500`;
+  const proxies = [
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  ];
+  onStatus("proxy");
+  for (const px of proxies) {
+    try {
+      const c = new AbortController(); const t = setTimeout(() => c.abort(), 8000);
+      const r = await fetch(px(vivinoUrl), { signal: c.signal, headers: { Accept: "application/json" } });
+      clearTimeout(t); if (!r.ok) continue;
+      const txt = await r.text();
+      if (!txt.trim().startsWith("{") && !txt.trim().startsWith("[")) continue;
+      const res = parseVivino(JSON.parse(txt));
+      if (res.length) return { results: res, source: "vivino-proxy" };
+    } catch { continue; }
+  }
+  if (backendUrl) {
+    onStatus("backend");
+    try {
+      const c = new AbortController(); const t = setTimeout(() => c.abort(), 15000);
+      const r = await fetch(`${backendUrl}/search?q=${encodeURIComponent(query)}`, { signal: c.signal });
+      clearTimeout(t); if (r.ok) { const d = await r.json(); if (d.results?.length) return { results: d.results, source: "backend" }; }
+    } catch {}
+  }
+  return null;
+}
 
-    const getColor = (b) => {
-      if (!b) return null;
-      const tc = TYPE_CONFIG[b.type] || TYPE_CONFIG.rouge;
-      return tc.regions[b.region] || Object.values(tc.regions).pop();
-    };
+/* ══════════════════════════════════════════════════════════
+   MAIN APP
+   ══════════════════════════════════════════════════════════ */
+function App() {
+  const saved = load();
+  const [bottles, setBottles] = useState(saved.bottles || {});
+  const [config, setConfig] = useState(saved.config || { cols: 10, rows: 6, backendUrl: "" });
+  const [tab, setTab] = useState("rack");
+  const [modal, setModal] = useState(null);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [searchStatus, setSearchStatus] = useState("");
+  const [searchErr, setSearchErr] = useState("");
+  const [manual, setManual] = useState(false);
+  const [form, setForm] = useState(emptyForm());
+  const [editCfg, setEditCfg] = useState(config);
+  const [toast, setToast] = useState(null);
+  const [fType, setFType] = useState(null);
+  const [fRegion, setFRegion] = useState(null);
+  const [fSearch, setFSearch] = useState("");
+  const [fApogee, setFApogee] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
-    // ════════════════════════════════════════════
-    //  STORAGE (localStorage)
-    // ════════════════════════════════════════════
-    const STORE_KEY = "cave-a-vin-data";
-    const load = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; } };
-    const save = (d) => { try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch {} };
+  useEffect(() => { save({ bottles, config }); }, [bottles, config]);
 
-    // ════════════════════════════════════════════
-    //  VIVINO SEARCH ENGINE
-    //  Stratégie : Proxy CORS → Backend Render → Erreur
-    // ════════════════════════════════════════════
+  function emptyForm() {
+    return { name:"", vintage:"", type:"rouge", region:"Bordeaux", notes:"", image:"", apogee_start:"", apogee_end:"" };
+  }
 
-    const CORS_PROXIES = [
-      (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-      (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-      (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-    ];
+  const flash = (m) => { setToast(m); setTimeout(() => setToast(null), 2200); };
+  const ck = (c, r) => `${c}-${r}`;
+  const closeModal = () => {
+    setModal(null); setQuery(""); setResults([]); setSearchErr("");
+    setManual(false); setSearchStatus(""); setForm(emptyForm());
+  };
 
-    const VIVINO_API = "https://www.vivino.com/api/explore/explore";
+  const doSearch = async () => {
+    if (!query.trim()) return;
+    setSearching(true); setSearchErr(""); setResults([]);
+    const r = await searchWine(query.trim(), config.backendUrl, setSearchStatus);
+    if (r) { setResults(r.results); setSearchStatus(r.source); }
+    else setSearchErr("Aucun résultat trouvé. Essayez un autre terme ou passez en saisie manuelle.");
+    setSearching(false);
+  };
 
-    function classifyType(id) {
-      return { 1:"rouge", 2:"blanc", 3:"petillant", 4:"rose", 7:"rose" }[id] || "rouge";
+  const addBottle = (key, data) => {
+    setBottles(p => ({ ...p, [key]: { ...data, added: data.added || new Date().toISOString() } }));
+    flash(`✓ ${data.name}`); closeModal();
+  };
+  const removeBottle = (key) => {
+    setBottles(p => { const n = { ...p }; delete n[key]; return n; });
+    flash("Bouteille retirée"); closeModal();
+  };
+
+  const allBottles = Object.values(bottles);
+  const capacity = config.cols * config.rows;
+  const year = new Date().getFullYear();
+
+  // Dynamic regions from cave content
+  const caveRegions = useMemo(() => {
+    const set = new Set();
+    allBottles.forEach(b => { if (b.region) set.add(b.region); });
+    return [...set].sort();
+  }, [bottles]);
+
+  // Available regions for manual form (merge defaults + cave)
+  const formRegions = useMemo(() => {
+    const typeRegs = Object.keys(DEFAULT_REGION_COLORS[form.type] || {});
+    const merged = new Set([...typeRegs, ...caveRegions]);
+    return [...merged].sort();
+  }, [form.type, caveRegions]);
+
+  // Stats
+  const stats = useMemo(() => {
+    const s = { total: 0, types: {}, regions: {}, vintages: {}, ratings: [], prices: [] };
+    allBottles.forEach(b => {
+      s.total++;
+      s.types[b.type] = (s.types[b.type] || 0) + 1;
+      s.regions[b.region] = (s.regions[b.region] || 0) + 1;
+      if (b.vintage) s.vintages[b.vintage] = (s.vintages[b.vintage] || 0) + 1;
+      if (b.rating) s.ratings.push(b.rating);
+      if (b.price) { const n = parseFloat(b.price); if (!isNaN(n)) s.prices.push(n); }
+    });
+    s.avgRating = s.ratings.length ? (s.ratings.reduce((a, b) => a + b, 0) / s.ratings.length).toFixed(1) : null;
+    s.totalValue = s.prices.length ? s.prices.reduce((a, b) => a + b, 0) : null;
+    return s;
+  }, [bottles]);
+
+  // Filters
+  const isFiltered = fType || fRegion || fSearch || fApogee;
+  const matchesFilter = (b) => {
+    if (!b) return false;
+    if (fType && b.type !== fType) return false;
+    if (fRegion && b.region !== fRegion) return false;
+    if (fSearch) {
+      const q = fSearch.toLowerCase();
+      if (!b.name.toLowerCase().includes(q) && !(b.winery || "").toLowerCase().includes(q)
+          && !(b.vintage + "").includes(q)) return false;
     }
-
-    function mapRegion(name) {
-      if (!name) return "Autre";
-      const r = name.toLowerCase();
-      const map = {
-        "bordeaux":"Bordeaux","bourgogne":"Bourgogne","burgundy":"Bourgogne",
-        "rhône":"Rhône","rhone":"Rhône","loire":"Loire","alsace":"Alsace",
-        "champagne":"Champagne","languedoc":"Languedoc","roussillon":"Languedoc",
-        "provence":"Provence","beaujolais":"Beaujolais","sud-ouest":"Sud-Ouest",
-        "south west":"Sud-Ouest","jura":"Jura","savoie":"Savoie",
-        "corse":"Corse","corsica":"Corse",
-        "toscana":"Italie","tuscany":"Italie","piemonte":"Italie","piedmont":"Italie",
-        "veneto":"Italie","sicilia":"Italie","campania":"Italie","puglia":"Italie",
-        "rioja":"Espagne","ribera":"Espagne","priorat":"Espagne","penedès":"Espagne",
-        "galicia":"Espagne","castilla":"Espagne","navarra":"Espagne",
-      };
-      for (const [kw, mapped] of Object.entries(map)) {
-        if (r.includes(kw)) return mapped;
-      }
-      return "Autre";
+    if (fApogee) {
+      if (!b.apogee_start && !b.apogee_end) return false;
+      if (year < (b.apogee_start || 0) || year > (b.apogee_end || 9999)) return false;
     }
+    return true;
+  };
+  const filteredCount = isFiltered ? allBottles.filter(matchesFilter).length : stats.total;
 
-    function parseVivinoJSON(data) {
-      const matches = data?.explore_vintage?.matches || [];
-      return matches.slice(0, 10).map(m => {
-        const v = m.vintage || {};
-        const w = v.wine || {};
-        const s = v.statistics || {};
-        let img = v.image?.location || null;
-        if (img && !img.startsWith("http")) img = "https:" + img;
-        const region = w.region?.name || w.region?.country?.name || "";
-        const grapes = (w.grapes || []).map(g => g.name).filter(Boolean);
-        const price = m.price?.amount ? `${m.price.amount.toFixed(0)} €` : null;
-        return {
-          name: w.name || "Inconnu",
-          winery: w.winery?.name || "",
-          vintage: v.year || null,
-          type: classifyType(w.type_id),
-          region: mapRegion(region),
-          region_raw: region,
-          rating: s.ratings_average ? Math.round(s.ratings_average * 10) / 10 : null,
-          ratings_count: s.ratings_count || 0,
-          price,
-          image: img,
-          grape: grapes.length ? grapes.join(", ") : null,
-          description: w.description || null,
-          vivino_url: w.seo_name ? `https://www.vivino.com${w.seo_name}` : null,
-          added: null, notes: null,
-        };
-      }).filter(r => r.name !== "Inconnu");
-    }
+  return (
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", position: "relative", zIndex: 1 }}>
 
-    // Méthode 1 : Appel direct Vivino via proxy CORS
-    async function searchViaCorsProxy(query) {
-      const vivinoUrl = `${VIVINO_API}?q=${encodeURIComponent(query)}&country_code=FR&currency_code=EUR&language=fr&page=1&price_range_min=0&price_range_max=500`;
-      
-      for (const makeProxy of CORS_PROXIES) {
-        try {
-          const proxyUrl = makeProxy(vivinoUrl);
-          const ctrl = new AbortController();
-          const timeout = setTimeout(() => ctrl.abort(), 8000);
-          const resp = await fetch(proxyUrl, {
-            signal: ctrl.signal,
-            headers: { "Accept": "application/json" }
-          });
-          clearTimeout(timeout);
-          if (!resp.ok) continue;
-          const text = await resp.text();
-          const data = JSON.parse(text);
-          const results = parseVivinoJSON(data);
-          if (results.length > 0) return { results, source: "vivino-proxy" };
-        } catch { continue; }
-      }
-      return null;
-    }
+      {/* ═════════════════ HEADER ═════════════════ */}
+      <header style={{
+        background: "var(--burgundy)",
+        color: "#fff",
+        padding: "18px 20px 14px",
+        position: "relative",
+        overflow: "hidden"
+      }}>
+        {/* Decorative vine pattern */}
+        <div style={{
+          position: "absolute", top: 0, right: -10, opacity: 0.06, fontSize: 120,
+          lineHeight: 1, pointerEvents: "none", fontFamily: "serif"
+        }}>🍇</div>
 
-    // Méthode 2 : Backend Render (fallback)
-    async function searchViaBackend(query, backendUrl) {
-      if (!backendUrl) return null;
-      try {
-        const ctrl = new AbortController();
-        const timeout = setTimeout(() => ctrl.abort(), 15000); // Render cold start = lent
-        const resp = await fetch(`${backendUrl}/search?q=${encodeURIComponent(query)}`, { signal: ctrl.signal });
-        clearTimeout(timeout);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
-        if (data.results?.length) return { results: data.results, source: "backend" };
-      } catch {}
-      return null;
-    }
-
-    // Orchestrateur
-    async function searchWine(query, backendUrl, onStatus) {
-      onStatus("proxy");
-      const proxyResult = await searchViaCorsProxy(query);
-      if (proxyResult) return proxyResult;
-
-      if (backendUrl) {
-        onStatus("backend");
-        const backendResult = await searchViaBackend(query, backendUrl);
-        if (backendResult) return backendResult;
-      }
-
-      return null;
-    }
-
-    // ════════════════════════════════════════════
-    //  APP PRINCIPALE
-    // ════════════════════════════════════════════
-    function App() {
-      const saved = load();
-      const [bottles, setBottles] = useState(saved.bottles || {});
-      const [config, setConfig] = useState(saved.config || { cols:10, rows:6, backendUrl:"" });
-      const [view, setView] = useState("rack");
-      const [cell, setCell] = useState(null);
-      const [query, setQuery] = useState("");
-      const [results, setResults] = useState([]);
-      const [searching, setSearching] = useState(false);
-      const [searchStatus, setSearchStatus] = useState(""); // "proxy" | "backend"
-      const [searchErr, setSearchErr] = useState("");
-      const [manual, setManual] = useState(false);
-      const [form, setForm] = useState({ name:"",vintage:"",type:"rouge",region:"Bordeaux",notes:"",image:"" });
-      const [editCfg, setEditCfg] = useState(config);
-      const [legend, setLegend] = useState(false);
-      const [toast, setToast] = useState(null);
-      const [filter, setFilter] = useState(null);
-
-      useEffect(() => { save({ bottles, config }); }, [bottles, config]);
-
-      const doSearch = async () => {
-        if (!query.trim()) return;
-        setSearching(true); setSearchErr(""); setResults([]); setSearchStatus("");
-        const result = await searchWine(query.trim(), config.backendUrl, setSearchStatus);
-        if (result) {
-          setResults(result.results);
-          setSearchStatus(result.source);
-        } else {
-          setSearchErr("Aucun résultat trouvé. Essayez un autre nom ou passez en saisie manuelle.");
-        }
-        setSearching(false);
-      };
-
-      const addBottle = (key, data) => {
-        setBottles(p => ({...p, [key]: {...data, added: data.added || new Date().toISOString()}}));
-        flash(`${data.name} ajouté !`); closeModal();
-      };
-      const removeBottle = (key) => {
-        setBottles(p => { const n={...p}; delete n[key]; return n; });
-        flash("Bouteille retirée"); closeModal();
-      };
-      const closeModal = () => { setView("rack"); setCell(null); resetSearch(); };
-      const resetSearch = () => { setQuery(""); setResults([]); setSearchErr(""); setManual(false); setSearchStatus("");
-        setForm({name:"",vintage:"",type:"rouge",region:"Bordeaux",notes:"",image:""}); };
-      const flash = (m) => { setToast(m); setTimeout(()=>setToast(null), 2200); };
-      const ck = (c,r) => `${c}-${r}`;
-
-      const stats = Object.values(bottles).reduce((a,b) => { a.total++; a[b.type]=(a[b.type]||0)+1; return a; }, {total:0});
-      const capacity = config.cols * config.rows;
-      const pct = capacity > 0 ? Math.round(stats.total / capacity * 100) : 0;
-
-      const S = {
-        btn: { padding:"10px 20px", border:"none", borderRadius:6, cursor:"pointer", fontFamily:"inherit", fontSize:15, fontWeight:600, transition:"all 0.15s", letterSpacing:0.3 },
-        gold: { background:"linear-gradient(135deg,#C49A2B,#A07818)", color:"#1A1018" },
-        dark: { background:"rgba(255,255,255,0.08)", color:"#E8DDD0", border:"1px solid rgba(255,255,255,0.12)" },
-        danger: { background:"rgba(180,40,40,0.25)", color:"#E8A0A0", border:"1px solid rgba(180,40,40,0.3)" },
-        input: { background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.12)", color:"#E8DDD0", padding:"10px 14px", borderRadius:6, fontFamily:"inherit", fontSize:15, width:"100%", outline:"none" },
-      };
-
-      return (
-        <div style={{ minHeight:"100dvh", background:"linear-gradient(170deg,#0D0A0E 0%,#1A1018 40%,#15100D 100%)", position:"relative" }}>
-
-          {/* BG texture */}
-          <div style={{ position:"fixed",inset:0,opacity:0.03,pointerEvents:"none",zIndex:0,
-            backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(200,168,92,0.3) 2px,rgba(200,168,92,0.3) 3px)" }} />
-
-          {/* ══════ HEADER ══════ */}
-          <header style={{
-            position:"sticky",top:0,zIndex:50,
-            background:"linear-gradient(180deg,rgba(13,10,14,0.97),rgba(13,10,14,0.85))",
-            backdropFilter:"blur(12px)", borderBottom:"1px solid rgba(196,154,43,0.15)",
-            padding:"12px 16px"
-          }}>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                <div style={{ fontSize:26 }}>🍇</div>
-                <div>
-                  <h1 style={{ fontSize:20, fontWeight:600, color:"#C49A2B", letterSpacing:1.5, lineHeight:1.1 }}>MA CAVE</h1>
-                  <div style={{ fontSize:10, color:"rgba(232,221,208,0.35)", letterSpacing:2, fontWeight:500, marginTop:1 }}>
-                    {stats.total}/{capacity} · {pct}% remplie
-                  </div>
-                </div>
-              </div>
-              <div style={{ display:"flex", gap:6 }}>
-                <HdrBtn active={legend} onClick={()=>setLegend(l=>!l)}>◐</HdrBtn>
-                <HdrBtn active={view==="settings"} onClick={()=>{setEditCfg(config);setView("settings");}}>⚙</HdrBtn>
-              </div>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", position: "relative" }}>
+          <div>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", letterSpacing: 0.5, lineHeight: 1 }}>
+              Ma Cave
+            </h1>
+            <div style={{
+              fontSize: 12, color: "rgba(255,255,255,0.55)", marginTop: 6,
+              fontWeight: 400, letterSpacing: 0.3
+            }}>
+              {stats.total} bouteille{stats.total > 1 ? "s" : ""}
+              {stats.total > 0 && ` · ${Math.round(stats.total / capacity * 100)}% remplie`}
+              {isFiltered && ` · ${filteredCount} filtrée${filteredCount > 1 ? "s" : ""}`}
             </div>
-            {/* Filter pills */}
-            <div style={{ display:"flex", gap:6, marginTop:10, overflowX:"auto", paddingBottom:2 }}>
-              <FilterPill active={filter===null} onClick={()=>setFilter(null)} label={`Tous (${stats.total})`} color="#C49A2B" />
-              {Object.entries(TYPE_CONFIG).map(([k,v]) => stats[k] > 0 ? (
-                <FilterPill key={k} active={filter===k} onClick={()=>setFilter(f=>f===k?null:k)}
-                  label={`${v.icon} ${stats[k]}`} color={Object.values(v.regions)[0]} />
+          </div>
+          <button onClick={() => setShowFilters(f => !f)} style={{
+            padding: "8px 16px", borderRadius: 24, fontSize: 13, fontWeight: 600,
+            background: showFilters || isFiltered ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.1)",
+            color: "#fff", backdropFilter: "blur(4px)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            transition: "all 0.2s"
+          }}>
+            {isFiltered ? "⚡ Filtres" : "☰ Filtres"}
+          </button>
+        </div>
+      </header>
+
+      {/* ═════════════════ FILTER BAR ═════════════════ */}
+      {showFilters && (
+        <div style={{
+          background: "#fff", padding: "14px 16px 16px",
+          borderBottom: "1px solid var(--cream3)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+          animation: "fadeIn 0.15s"
+        }}>
+          <input value={fSearch} onChange={e => setFSearch(e.target.value)}
+            placeholder="🔍 Rechercher un vin, domaine, millésime..."
+            style={{ marginBottom: 12, padding: "10px 14px", fontSize: 14, borderRadius: 10 }} />
+
+          {/* Type filters */}
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+            <Chip active={!fType} onClick={() => setFType(null)} label="Tous types" />
+            {Object.entries(TYPE_CFG).map(([k, v]) =>
+              <Chip key={k} active={fType === k} onClick={() => setFType(f => f === k ? null : k)}
+                label={`${v.icon} ${v.label}`} color={v.baseColor}
+                count={stats.types[k] || 0} />
+            )}
+          </div>
+
+          {/* Region filters - dynamic from cave */}
+          {caveRegions.length > 0 && (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+              <Chip active={!fRegion} onClick={() => setFRegion(null)} label="Toutes régions" />
+              {caveRegions.map(r =>
+                <Chip key={r} active={fRegion === r} onClick={() => setFRegion(f => f === r ? null : r)}
+                  label={r} count={stats.regions[r] || 0} />
+              )}
+            </div>
+          )}
+
+          {/* Apogee + clear */}
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <Chip active={fApogee} onClick={() => setFApogee(f => !f)}
+              label={`🎯 À boire en ${year}`} color="#2E7D32" />
+            {isFiltered && (
+              <button onClick={() => { setFType(null); setFRegion(null); setFSearch(""); setFApogee(false); }}
+                style={{ fontSize: 12, color: "var(--ink4)", background: "none", textDecoration: "underline", marginLeft: "auto" }}>
+                Tout effacer
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═════════════════ MAIN ═════════════════ */}
+      <main style={{ flex: 1, overflowY: "auto", paddingBottom: 80 }}>
+
+        {/* ═══ RACK ═══ */}
+        {tab === "rack" && (
+          <div style={{ padding: "16px 10px" }}>
+            <div style={{
+              background: "linear-gradient(160deg, #D4B896 0%, #C4A880 40%, #B89868 100%)",
+              borderRadius: 16, padding: "14px 10px",
+              boxShadow: "var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.3)",
+              overflowX: "auto", position: "relative"
+            }}>
+              {/* Wood grain overlay */}
+              <div style={{
+                position: "absolute", inset: 0, borderRadius: 16, pointerEvents: "none", opacity: 0.08,
+                backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(80,50,20,0.5) 18px, rgba(80,50,20,0.5) 19px)",
+              }} />
+
+              {/* Column headers */}
+              <div style={{ display: "flex", paddingLeft: 28, marginBottom: 4, position: "relative" }}>
+                {Array.from({ length: config.cols }, (_, c) =>
+                  <div key={c} style={{
+                    width: 50, minWidth: 50, textAlign: "center",
+                    fontSize: 11, color: "rgba(60,30,10,0.5)", fontWeight: 700
+                  }}>{c + 1}</div>
+                )}
+              </div>
+
+              {/* Rows */}
+              {Array.from({ length: config.rows }, (_, r) =>
+                <div key={r} style={{ display: "flex", alignItems: "center", marginBottom: 3, position: "relative" }}>
+                  <div style={{
+                    width: 26, textAlign: "center", fontSize: 11,
+                    color: "rgba(60,30,10,0.5)", fontWeight: 700
+                  }}>
+                    {String.fromCharCode(65 + r)}
+                  </div>
+                  {Array.from({ length: config.cols }, (_, c) => {
+                    const key = ck(c, r), b = bottles[key], color = getBottleColor(b);
+                    const filtered = isFiltered && b && !matchesFilter(b);
+                    const emptyDim = isFiltered && !b;
+
+                    return (
+                      <div key={key} className="cell-slot"
+                        onClick={() => { setForm(emptyForm()); setModal({ type: b ? "detail" : "add", cell: key }); }}
+                        style={{
+                          width: 46, height: 46, minWidth: 46, borderRadius: "50%",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          cursor: "pointer", margin: "1.5px", position: "relative",
+                          transition: "all 0.2s, transform 0.1s",
+                          opacity: filtered ? 0.15 : emptyDim ? 0.5 : 1,
+                          background: b
+                            ? `radial-gradient(circle at 36% 30%, ${color}EE, ${color}AA 55%, ${color}77)`
+                            : "radial-gradient(circle, rgba(90,60,30,0.25), rgba(70,40,15,0.35))",
+                          border: b
+                            ? `2.5px solid rgba(255,255,255,0.25)`
+                            : "2px dashed rgba(90,60,30,0.2)",
+                          boxShadow: b
+                            ? `inset 0 -3px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.15), 0 3px 8px rgba(0,0,0,0.15)`
+                            : "inset 0 2px 6px rgba(0,0,0,0.12)"
+                        }}
+                      >
+                        {b && <>
+                          {/* Glass reflection */}
+                          <div style={{
+                            position: "absolute", top: 6, left: 11, width: 9, height: 6,
+                            background: "rgba(255,255,255,0.3)", borderRadius: "50%",
+                            transform: "rotate(-25deg)", filter: "blur(1.5px)"
+                          }} />
+                          <span style={{
+                            fontSize: 10, fontWeight: 800, color: "#fff",
+                            textShadow: "0 1px 4px rgba(0,0,0,0.5)", letterSpacing: 0.5
+                          }}>
+                            {b.vintage ? String(b.vintage).slice(2) : "•"}
+                          </span>
+                        </>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Légende rapide sous le rack */}
+            <div style={{
+              display: "flex", gap: 12, justifyContent: "center", marginTop: 14,
+              flexWrap: "wrap"
+            }}>
+              {Object.entries(TYPE_CFG).map(([k, v]) => stats.types[k] ? (
+                <div key={k} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--ink3)" }}>
+                  <div style={{
+                    width: 12, height: 12, borderRadius: "50%",
+                    background: v.baseColor, boxShadow: `0 1px 3px ${v.baseColor}44`
+                  }} />
+                  {v.label} ({stats.types[k]})
+                </div>
               ) : null)}
             </div>
-          </header>
+          </div>
+        )}
 
-          {/* ══════ LÉGENDE ══════ */}
-          {legend && (
-            <div style={{ margin:"12px 14px", padding:14, background:"rgba(255,255,255,0.04)", borderRadius:12, border:"1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ fontSize:13, fontWeight:600, color:"#C49A2B", marginBottom:10, letterSpacing:0.8 }}>LÉGENDE DES COULEURS</div>
-              {Object.entries(TYPE_CONFIG).map(([type,tc]) => (
-                <div key={type} style={{ marginBottom:10 }}>
-                  <div style={{ fontSize:12, fontWeight:600, color:"rgba(232,221,208,0.6)", marginBottom:5 }}>{tc.icon} {tc.label}</div>
-                  <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
-                    {Object.entries(tc.regions).map(([region,color]) => (
-                      <div key={region} style={{ display:"flex",alignItems:"center",gap:5, background:"rgba(255,255,255,0.04)",padding:"2px 8px 2px 5px",borderRadius:16,fontSize:11 }}>
-                        <div style={{ width:12,height:12,borderRadius:"50%",background:color,boxShadow:`0 0 5px ${color}55` }} />
-                        <span style={{ color:"rgba(232,221,208,0.55)" }}>{region}</span>
+        {/* ═══ STATS ═══ */}
+        {tab === "stats" && (
+          <div style={{ padding: "20px 16px", animation: "fadeIn 0.2s" }}>
+            <h2 style={{ fontSize: 24, marginBottom: 20 }}>Statistiques</h2>
+
+            {stats.total === 0 ? (
+              <div style={{ textAlign: "center", padding: "50px 20px", color: "var(--ink4)" }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🍇</div>
+                <div style={{ fontSize: 17, fontWeight: 500 }}>Votre cave est vide</div>
+                <div style={{ fontSize: 14, marginTop: 6, color: "var(--ink4)" }}>
+                  Ajoutez des bouteilles pour voir apparaître vos statistiques
+                </div>
+              </div>
+            ) : <>
+              {/* Metric cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+                <MetricCard icon="🍾" value={stats.total} label="Bouteilles" />
+                <MetricCard icon="📊" value={`${Math.round(stats.total / capacity * 100)}%`} label="Remplissage" />
+                {stats.avgRating && <MetricCard icon="⭐" value={`${stats.avgRating}`} label="Note moyenne" />}
+                {stats.totalValue != null && <MetricCard icon="💰" value={`${Math.round(stats.totalValue)}€`} label="Valeur estimée" />}
+              </div>
+
+              {/* By type */}
+              <CardSection title="Répartition par type">
+                {Object.entries(TYPE_CFG).map(([k, v]) => {
+                  const n = stats.types[k] || 0; if (!n) return null;
+                  const pct = Math.round(n / stats.total * 100);
+                  return (
+                    <div key={k} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                      <div style={{
+                        width: 38, height: 38, borderRadius: "50%", display: "flex",
+                        alignItems: "center", justifyContent: "center",
+                        background: v.lightBg, fontSize: 18, flexShrink: 0
+                      }}>{v.icon}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{v.label}</span>
+                          <span style={{ fontSize: 13, color: "var(--ink3)" }}>{n} · {pct}%</span>
+                        </div>
+                        <div style={{ height: 8, background: "var(--cream2)", borderRadius: 4, overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, background: v.baseColor, borderRadius: 4, transition: "width 0.6s ease" }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardSection>
+
+              {/* By region */}
+              <CardSection title="Répartition par région">
+                {Object.entries(stats.regions).sort((a, b) => b[1] - a[1]).map(([r, n]) => (
+                  <div key={r} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid var(--cream2)" }}>
+                    <span style={{ fontSize: 14, color: "var(--ink2)" }}>{r}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{
+                        background: "var(--burgundy)", color: "#fff", fontSize: 12, fontWeight: 700,
+                        padding: "2px 10px", borderRadius: 12, minWidth: 28, textAlign: "center"
+                      }}>{n}</div>
+                    </div>
+                  </div>
+                ))}
+              </CardSection>
+
+              {/* By vintage */}
+              {Object.keys(stats.vintages).length > 0 && (
+                <CardSection title="Par millésime">
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {Object.entries(stats.vintages).sort((a, b) => Number(b[0]) - Number(a[0])).slice(0, 15).map(([y, n]) => (
+                      <div key={y} style={{
+                        background: "var(--cream2)", padding: "6px 14px", borderRadius: 20,
+                        fontSize: 13, fontWeight: 500, color: "var(--ink2)"
+                      }}>
+                        {y} <span style={{ fontWeight: 700, color: "var(--burgundy)" }}>×{n}</span>
                       </div>
                     ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                </CardSection>
+              )}
 
-          {/* ══════ RACK VIEW ══════ */}
-          {view === "rack" && (
-            <div style={{ padding:"16px 10px", position:"relative", zIndex:1 }}>
-              <div style={{
-                background:"linear-gradient(145deg,rgba(74,50,28,0.2),rgba(40,25,15,0.3))",
-                border:"2px solid rgba(120,80,40,0.25)", borderRadius:14, padding:"16px 12px",
-                boxShadow:"inset 0 2px 20px rgba(0,0,0,0.3)", overflowX:"auto"
-              }}>
-                {/* Col labels */}
-                <div style={{ display:"flex", paddingLeft:24, marginBottom:3 }}>
-                  {Array.from({length:config.cols},(_,c) => (
-                    <div key={c} style={{ width:48,minWidth:48,textAlign:"center",fontSize:10,color:"rgba(196,154,43,0.35)",fontWeight:600,letterSpacing:1 }}>{c+1}</div>
-                  ))}
-                </div>
-
-                {Array.from({length:config.rows},(_,r) => (
-                  <div key={r} style={{ display:"flex",alignItems:"center",gap:2 }}>
-                    <div style={{ width:22,textAlign:"center",fontSize:10,color:"rgba(196,154,43,0.35)",fontWeight:600 }}>
-                      {String.fromCharCode(65+r)}
+              {/* Apogee */}
+              {allBottles.some(b => b.apogee_start || b.apogee_end) && (
+                <CardSection title={`🎯 À déguster en ${year}`}>
+                  {allBottles.filter(b => {
+                    const s = b.apogee_start || 0, e = b.apogee_end || 9999;
+                    return year >= s && year <= e;
+                  }).length === 0 ? (
+                    <div style={{ fontSize: 14, color: "var(--ink4)", padding: "8px 0" }}>
+                      Aucune bouteille à son apogée cette année
                     </div>
-                    {Array.from({length:config.cols},(_,c) => {
-                      const key = ck(c,r);
-                      const b = bottles[key];
-                      const color = getColor(b);
-                      const hidden = filter && b && b.type !== filter;
-                      const dimmed = filter && !b;
-                      return (
-                        <div key={key}
-                          onClick={() => { setCell(key); resetSearch(); setView(b?"detail":"add"); }}
-                          style={{
-                            width:44, height:44, minWidth:44, borderRadius:"50%",
-                            display:"flex", alignItems:"center", justifyContent:"center",
-                            position:"relative", cursor:"pointer", margin:2,
-                            transition:"all 0.15s",
-                            opacity: hidden ? 0.15 : dimmed ? 0.4 : 1,
-                            background: b
-                              ? `radial-gradient(circle at 35% 35%, ${color}CC, ${color}88 50%, ${color}55 100%)`
-                              : "radial-gradient(circle at 50% 50%, rgba(30,20,15,0.9), rgba(15,10,8,0.95))",
-                            boxShadow: b
-                              ? `inset 0 -2px 4px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.1), 0 0 8px ${color}33`
-                              : "inset 0 2px 8px rgba(0,0,0,0.6)",
-                            border: b ? `2px solid ${color}66` : "2px solid rgba(80,55,30,0.2)"
-                          }}
-                        >
-                          {b && <>
-                            <div style={{ position:"absolute",top:5,left:9,width:10,height:7, background:"rgba(255,255,255,0.15)",borderRadius:"50%",transform:"rotate(-30deg)",filter:"blur(2px)" }} />
-                            <span style={{ fontSize:9,fontWeight:700,color:"rgba(255,255,255,0.7)",textShadow:"0 1px 3px rgba(0,0,0,0.6)" }}>
-                              {b.vintage ? String(b.vintage).slice(2) : ""}
-                            </span>
-                          </>}
-                          {!b && <div style={{ width:14,height:14,borderRadius:"50%",border:"1px dashed rgba(120,80,40,0.15)" }} />}
+                  ) : allBottles.filter(b => {
+                    const s = b.apogee_start || 0, e = b.apogee_end || 9999;
+                    return year >= s && year <= e;
+                  }).map((b, i) => (
+                    <div key={i} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "10px 0", borderBottom: "1px solid var(--cream2)"
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{b.name}</div>
+                        <div style={{ fontSize: 12, color: "var(--ink4)" }}>
+                          {b.vintage && `${b.vintage} · `}{b.region}
                         </div>
-                      );
-                    })}
-                  </div>
-                ))}
+                      </div>
+                      <div style={{
+                        fontSize: 12, fontWeight: 600, color: "#2E7D32",
+                        background: "#E8F5E9", padding: "3px 10px", borderRadius: 12
+                      }}>
+                        {b.apogee_start}–{b.apogee_end}
+                      </div>
+                    </div>
+                  ))}
+                </CardSection>
+              )}
+            </>}
+          </div>
+        )}
+
+        {/* ═══ SETTINGS ═══ */}
+        {tab === "settings" && (
+          <div style={{ padding: "20px 16px", animation: "fadeIn 0.2s" }}>
+            <h2 style={{ fontSize: 24, marginBottom: 20 }}>Réglages</h2>
+
+            <CardSection title="Dimensions du rack">
+              <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 12, color: "var(--ink4)", marginBottom: 4, display: "block", fontWeight: 600 }}>Colonnes</label>
+                  <input type="number" min={1} max={20} value={editCfg.cols}
+                    onChange={e => setEditCfg(c => ({ ...c, cols: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) }))} />
+                </div>
+                <div style={{ color: "var(--ink4)", fontSize: 22, paddingTop: 18, fontWeight: 300 }}>×</div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 12, color: "var(--ink4)", marginBottom: 4, display: "block", fontWeight: 600 }}>Rangées</label>
+                  <input type="number" min={1} max={20} value={editCfg.rows}
+                    onChange={e => setEditCfg(c => ({ ...c, rows: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) }))} />
+                </div>
               </div>
-              <div style={{ textAlign:"center",marginTop:12,fontSize:12,color:"rgba(232,221,208,0.25)",fontStyle:"italic" }}>
-                Touchez un emplacement pour ajouter ou consulter une bouteille
+              <div style={{ fontSize: 13, color: "var(--ink4)", marginTop: 8 }}>
+                Capacité : <strong style={{ color: "var(--ink2)" }}>{editCfg.cols * editCfg.rows}</strong> bouteilles
+              </div>
+            </CardSection>
+
+            <CardSection title="Serveur Vivino (backup)">
+              <input value={editCfg.backendUrl}
+                onChange={e => setEditCfg(c => ({ ...c, backendUrl: e.target.value }))}
+                placeholder="https://ma-cave-api.onrender.com" />
+              <p style={{ fontSize: 12, color: "var(--ink4)", marginTop: 8, lineHeight: 1.6 }}>
+                La recherche passe directement par Vivino via proxy CORS.
+                Ajoutez un backend Render comme filet de sécurité si les proxies tombent.
+              </p>
+              <button onClick={async () => {
+                try {
+                  const r = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(VIVINO_API + "?q=test&country_code=FR&page=1"), { signal: AbortSignal.timeout(6000) });
+                  if (r.ok) { flash("✅ Proxy CORS fonctionnel"); return; }
+                } catch {}
+                if (editCfg.backendUrl) {
+                  try { const r = await fetch(editCfg.backendUrl + "/health", { signal: AbortSignal.timeout(12000) }); if (r.ok) { flash("✅ Backend OK"); return; } } catch {}
+                }
+                flash("❌ Connexion échouée");
+              }} style={{
+                marginTop: 10, padding: "11px", borderRadius: 10, fontSize: 14, fontWeight: 500,
+                background: "var(--cream2)", color: "var(--ink2)", width: "100%"
+              }}>
+                🔌 Tester la connexion
+              </button>
+            </CardSection>
+
+            <CardSection title="Données">
+              <div style={{ display: "flex", gap: 10 }}>
+                <Btn variant="light" style={{ flex: 1 }} onClick={() => {
+                  const d = JSON.stringify({ bottles, config }, null, 2);
+                  const blob = new Blob([d], { type: "application/json" });
+                  const u = URL.createObjectURL(blob);
+                  const a = document.createElement("a"); a.href = u;
+                  a.download = `ma-cave-${new Date().toISOString().slice(0, 10)}.json`;
+                  a.click(); URL.revokeObjectURL(u); flash("Export téléchargé");
+                }}>📤 Exporter</Btn>
+                <Btn variant="light" style={{ flex: 1 }} onClick={() => {
+                  const i = document.createElement("input"); i.type = "file"; i.accept = ".json";
+                  i.onchange = (e) => {
+                    const f = e.target.files[0]; if (!f) return;
+                    const r = new FileReader();
+                    r.onload = (ev) => {
+                      try {
+                        const d = JSON.parse(ev.target.result);
+                        if (d.bottles) setBottles(d.bottles);
+                        if (d.config) { setConfig(d.config); setEditCfg(d.config); }
+                        flash("Import réussi !");
+                      } catch { flash("Fichier invalide"); }
+                    };
+                    r.readAsText(f);
+                  }; i.click();
+                }}>📥 Importer</Btn>
+              </div>
+            </CardSection>
+
+            <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+              <Btn variant="primary" style={{ flex: 1 }} onClick={() => {
+                setConfig(editCfg); flash("Sauvegardé !"); setTab("rack");
+              }}>💾 Sauvegarder</Btn>
+              <Btn variant="danger" onClick={() => {
+                if (confirm("Vider toute la cave ?")) { setBottles({}); flash("Cave vidée"); setTab("rack"); }
+              }}>🗑</Btn>
+            </div>
+
+            <div style={{
+              marginTop: 30, padding: 16, background: "var(--cream2)",
+              borderRadius: 12, fontSize: 12, color: "var(--ink4)", lineHeight: 1.7
+            }}>
+              <strong style={{ color: "var(--burgundy)" }}>Ma Cave v4</strong><br />
+              Données stockées localement sur votre appareil<br />
+              Recherche Vivino via proxy CORS + backend optionnel<br />
+              Régions dynamiques (s'enrichissent avec votre cave)
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* ═════════════════ NAV BAR ═════════════════ */}
+      <nav style={{
+        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 50,
+        background: "#fff",
+        borderTop: "1px solid var(--cream3)",
+        display: "flex",
+        paddingBottom: "max(6px, var(--safe-b))",
+        boxShadow: "0 -2px 12px rgba(0,0,0,0.06)"
+      }}>
+        <TabBtn active={tab === "rack"} icon="⊞" label="Cave" onClick={() => setTab("rack")} />
+        <TabBtn active={tab === "stats"} icon="◎" label="Stats" onClick={() => setTab("stats")} />
+        <TabBtn active={tab === "settings"} icon="⚙" label="Réglages" onClick={() => { setEditCfg(config); setTab("settings"); }} />
+      </nav>
+
+      {/* ═════════════════ ADD MODAL ═════════════════ */}
+      {modal?.type === "add" && (
+        <Sheet onClose={closeModal}>
+          <SheetHeader
+            title="Ajouter une bouteille"
+            sub={`Emplacement ${parseInt(modal.cell.split("-")[0]) + 1}${String.fromCharCode(65 + parseInt(modal.cell.split("-")[1]))}`}
+            onClose={closeModal} />
+
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            <Toggle active={!manual} onClick={() => setManual(false)}>🔍 Vivino</Toggle>
+            <Toggle active={manual} onClick={() => setManual(true)}>✏️ Manuel</Toggle>
+          </div>
+
+          {!manual && <>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <input value={query} onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && doSearch()}
+                placeholder="Ex: Château Margaux 2015"
+                style={{ flex: 1, padding: "12px 14px", fontSize: 14 }} />
+              <Btn variant="primary" onClick={doSearch} disabled={searching}
+                style={{ minWidth: 60, opacity: searching ? 0.6 : 1 }}>
+                {searching ? "..." : "OK"}
+              </Btn>
+            </div>
+            {searching && <Loader status={searchStatus} />}
+            {searchErr && (
+              <div style={{
+                padding: 12, borderRadius: 10, fontSize: 13, marginBottom: 12,
+                background: "#FFF3F0", color: "#C0392B", border: "1px solid #FADBD8"
+              }}>{searchErr}</div>
+            )}
+            {!searching && results.length > 0 && (
+              <div style={{
+                fontSize: 12, marginBottom: 10, display: "flex", alignItems: "center", gap: 6,
+                color: searchStatus === "vivino-proxy" ? "#2E7D32" : "#1565C0"
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor" }} />
+                {searchStatus === "vivino-proxy" ? "Direct Vivino" : "Via serveur"} · {results.length} résultat{results.length > 1 ? "s" : ""}
+              </div>
+            )}
+            {results.map((w, i) => <WineCard key={i} wine={w} onClick={() => addBottle(modal.cell, w)} />)}
+          </>}
+
+          {manual && <ManualForm form={form} setForm={setForm} regions={formRegions} onAdd={d => addBottle(modal.cell, d)} />}
+        </Sheet>
+      )}
+
+      {/* ═════════════════ DETAIL MODAL ═════════════════ */}
+      {modal?.type === "detail" && bottles[modal.cell] && (() => {
+        const b = bottles[modal.cell], color = getBottleColor(b), tc = TYPE_CFG[b.type] || TYPE_CFG.rouge;
+        return (
+          <Sheet onClose={closeModal} noPad>
+            {/* Photo area */}
+            <div style={{
+              position: "relative", height: b.image ? 280 : 120,
+              background: `linear-gradient(180deg, ${tc.lightBg}, var(--cream))`,
+              display: "flex", alignItems: "center", justifyContent: "center"
+            }}>
+              {b.image
+                ? <img src={b.image} alt="" style={{
+                    maxHeight: 260, maxWidth: "55%", objectFit: "contain",
+                    filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.15))"
+                  }} />
+                : <div style={{ fontSize: 60, opacity: 0.15 }}>{tc.icon}</div>
+              }
+              <button onClick={closeModal} style={{
+                position: "absolute", top: 14, right: 14, width: 36, height: 36,
+                borderRadius: "50%", background: "rgba(255,255,255,0.8)", backdropFilter: "blur(6px)",
+                color: "var(--ink3)", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+              }}>✕</button>
+              <div style={{
+                position: "absolute", top: 14, left: 14,
+                background: "rgba(255,255,255,0.8)", backdropFilter: "blur(6px)",
+                padding: "4px 12px", borderRadius: 12, fontSize: 12, color: "var(--ink3)", fontWeight: 600,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
+              }}>
+                📍 {parseInt(modal.cell.split("-")[0]) + 1}{String.fromCharCode(65 + parseInt(modal.cell.split("-")[1]))}
               </div>
             </div>
-          )}
 
-          {/* ══════ ADD MODAL ══════ */}
-          {view === "add" && cell && (
-            <Modal onClose={closeModal}>
-              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18 }}>
-                <div>
-                  <h2 style={{ fontSize:19,fontWeight:600,color:"#C49A2B" }}>Ajouter une bouteille</h2>
-                  <div style={{ fontSize:11,color:"rgba(232,221,208,0.4)",marginTop:2 }}>
-                    Emplacement {parseInt(cell.split("-")[0])+1}{String.fromCharCode(65+parseInt(cell.split("-")[1]))}
-                  </div>
-                </div>
-                <CloseBtn onClick={closeModal} />
+            <div style={{ padding: "16px 20px 28px" }}>
+              {/* Type badge */}
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 10,
+                background: tc.lightBg, padding: "5px 14px", borderRadius: 20,
+                fontSize: 13, fontWeight: 600, color: tc.baseColor
+              }}>
+                <div style={{ width: 9, height: 9, borderRadius: "50%", background: color }} />
+                {tc.label} · {b.region}
               </div>
 
-              {/* Toggle */}
-              <div style={{ display:"flex",gap:8,marginBottom:14 }}>
-                <ToggleBtn active={!manual} onClick={()=>setManual(false)}>🔍 Vivino</ToggleBtn>
-                <ToggleBtn active={manual} onClick={()=>setManual(true)}>✏️ Manuel</ToggleBtn>
-              </div>
-
-              {!manual && <>
-                <div style={{ display:"flex",gap:8,marginBottom:10 }}>
-                  <input style={S.input} value={query} onChange={e=>setQuery(e.target.value)}
-                    onKeyDown={e=>e.key==="Enter"&&doSearch()} placeholder="Ex: Château Margaux 2015" />
-                  <button style={{...S.btn,...S.gold,minWidth:75,opacity:searching?0.6:1}} onClick={doSearch} disabled={searching}>
-                    {searching ? "..." : "OK"}
-                  </button>
+              <h2 style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.25, marginBottom: 3 }}>{b.name}</h2>
+              {b.winery && <div style={{ fontSize: 14, color: "var(--ink4)", marginBottom: 4 }}>{b.winery}</div>}
+              {b.vintage && (
+                <div style={{ fontSize: 17, color: "var(--gold)", fontWeight: 600, marginBottom: 16 }}>
+                  Millésime {b.vintage}
                 </div>
+              )}
 
-                {/* Status indicator */}
-                {searching && (
-                  <div style={{ textAlign:"center",padding:24,color:"rgba(232,221,208,0.4)" }}>
-                    <div style={{ fontSize:28,marginBottom:6,animation:"pulse 1.2s infinite" }}>🍷</div>
-                    <div>{searchStatus === "proxy" ? "Recherche sur Vivino..." : "Connexion au serveur backup..."}</div>
-                    <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
-                  </div>
-                )}
-
-                {/* Source badge */}
-                {!searching && results.length > 0 && (
-                  <div style={{
-                    display:"inline-flex",alignItems:"center",gap:5,marginBottom:10,
-                    padding:"3px 10px",borderRadius:12,fontSize:11,
-                    background: searchStatus==="vivino-proxy" ? "rgba(80,180,80,0.12)" : "rgba(100,140,220,0.12)",
-                    color: searchStatus==="vivino-proxy" ? "#80C880" : "#88AAD8",
-                    border: `1px solid ${searchStatus==="vivino-proxy" ? "rgba(80,180,80,0.2)" : "rgba(100,140,220,0.2)"}`
-                  }}>
-                    {searchStatus==="vivino-proxy" ? "⚡ Direct Vivino" : "☁️ Via serveur"}
-                    &nbsp;· {results.length} résultat{results.length>1?"s":""}
-                  </div>
-                )}
-
-                {searchErr && <div style={{ padding:10,borderRadius:8,background:"rgba(180,80,40,0.15)",border:"1px solid rgba(180,80,40,0.2)",fontSize:12,color:"#D4A080",marginBottom:10 }}>{searchErr}</div>}
-
-                {results.map((w,i) => (
-                  <WineCard key={i} wine={w} onClick={()=>addBottle(cell,w)} />
-                ))}
-              </>}
-
-              {manual && <ManualForm form={form} setForm={setForm} onAdd={(data)=>addBottle(cell,data)} />}
-            </Modal>
-          )}
-
-          {/* ══════ DETAIL MODAL ══════ */}
-          {view === "detail" && cell && bottles[cell] && (() => {
-            const b = bottles[cell];
-            const color = getColor(b);
-            const tc = TYPE_CONFIG[b.type] || TYPE_CONFIG.rouge;
-            return (
-              <Modal onClose={closeModal} bg={`linear-gradient(180deg,${tc.bg},#0D0A0E)`} noPad>
-                {/* Image header */}
-                <div style={{
-                  position:"relative", height:b.image?260:100,
-                  background:`radial-gradient(ellipse at 50% 70%,${color}30,transparent 70%)`,
-                  display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"
-                }}>
-                  {b.image
-                    ? <img src={b.image} alt="" style={{ maxHeight:240,maxWidth:"60%",objectFit:"contain",filter:"drop-shadow(0 8px 24px rgba(0,0,0,0.5))" }} />
-                    : <div style={{ fontSize:56,opacity:0.3 }}>{tc.icon}</div>
-                  }
-                  <CloseBtn onClick={closeModal} style={{ position:"absolute",top:14,right:14,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)" }} />
-                  <div style={{
-                    position:"absolute",top:14,left:14, background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",
-                    padding:"3px 10px",borderRadius:16,fontSize:11,color:"rgba(232,221,208,0.6)"
-                  }}>📍 {parseInt(cell.split("-")[0])+1}{String.fromCharCode(65+parseInt(cell.split("-")[1]))}</div>
-                </div>
-
-                <div style={{ padding:"18px 20px 24px" }}>
-                  <div style={{
-                    display:"inline-flex",alignItems:"center",gap:5,marginBottom:8,
-                    background:`${color}22`,padding:"3px 12px",borderRadius:16,
-                    border:`1px solid ${color}33`,fontSize:12,color:color
-                  }}>
-                    <div style={{ width:9,height:9,borderRadius:"50%",background:color }} />
-                    {tc.label} · {b.region}
-                  </div>
-                  <h2 style={{ fontSize:22,fontWeight:700,color:"#E8DDD0",lineHeight:1.2,marginBottom:3 }}>{b.name}</h2>
-                  {b.winery && <div style={{ fontSize:14,color:"rgba(232,221,208,0.5)",marginBottom:4 }}>{b.winery}</div>}
-                  {b.vintage && <div style={{ fontSize:17,color:"#C49A2B",fontWeight:500,marginBottom:14 }}>Millésime {b.vintage}</div>}
-
-                  {(b.rating||b.price) && (
-                    <div style={{ display:"flex",gap:12,marginBottom:16 }}>
-                      {b.rating && <StatBox label="Note Vivino" value={`★ ${b.rating}`} accent />}
-                      {b.price && <StatBox label="Prix moyen" value={b.price} />}
+              {/* Rating & Price */}
+              {(b.rating || b.price) && (
+                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                  {b.rating && (
+                    <div style={{
+                      flex: 1, background: "#FFF8E1", padding: "14px", borderRadius: 12, textAlign: "center"
+                    }}>
+                      <div style={{ fontSize: 24, fontWeight: 700, color: "var(--gold)" }}>★ {b.rating}</div>
+                      <div style={{ fontSize: 11, color: "var(--ink4)", marginTop: 2 }}>Vivino</div>
                     </div>
                   )}
-                  {b.grape && <InfoRow label="CÉPAGE(S)" value={b.grape} />}
-                  {b.region_raw && b.region_raw !== b.region && <InfoRow label="APPELLATION" value={b.region_raw} />}
-                  {b.description && <InfoRow label="DESCRIPTION" value={b.description} />}
-                  {b.notes && <InfoRow label="MES NOTES" value={b.notes} accent />}
-                  {b.added && <div style={{ fontSize:11,color:"rgba(232,221,208,0.25)",marginTop:12 }}>Ajouté le {new Date(b.added).toLocaleDateString("fr-FR")}</div>}
-
-                  <div style={{ display:"flex",gap:8,marginTop:18 }}>
-                    {b.vivino_url && <a href={b.vivino_url} target="_blank" rel="noopener noreferrer"
-                      style={{...S.btn,...S.dark,flex:1,textAlign:"center",textDecoration:"none",color:"#E8DDD0"}}>🔗 Vivino</a>}
-                    <button style={{...S.btn,...S.danger,flex:b.vivino_url?0:1}}
-                      onClick={()=>{if(confirm("Retirer cette bouteille ?"))removeBottle(cell);}}>🗑 Retirer</button>
-                  </div>
+                  {b.price && (
+                    <div style={{
+                      flex: 1, background: "var(--cream2)", padding: "14px", borderRadius: 12, textAlign: "center"
+                    }}>
+                      <div style={{ fontSize: 24, fontWeight: 700, color: "var(--ink)" }}>{b.price}</div>
+                      <div style={{ fontSize: 11, color: "var(--ink4)", marginTop: 2 }}>Prix moyen</div>
+                    </div>
+                  )}
                 </div>
-              </Modal>
-            );
-          })()}
+              )}
 
-          {/* ══════ SETTINGS ══════ */}
-          {view === "settings" && (
-            <Modal onClose={()=>setView("rack")}>
-              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20 }}>
-                <h2 style={{ fontSize:19,fontWeight:600,color:"#C49A2B" }}>⚙ Réglages</h2>
-                <CloseBtn onClick={()=>setView("rack")} />
+              {b.grape && <InfoBlock label="CÉPAGE(S)" value={b.grape} />}
+              {b.region_raw && b.region_raw !== b.region && <InfoBlock label="APPELLATION" value={b.region_raw} />}
+              {(b.apogee_start || b.apogee_end) && (
+                <InfoBlock label="APOGÉE" value={`${b.apogee_start || "?"} – ${b.apogee_end || "?"}`}
+                  highlight={year >= (b.apogee_start || 0) && year <= (b.apogee_end || 9999)} />
+              )}
+              {b.description && <InfoBlock label="DESCRIPTION" value={b.description} />}
+              {b.notes && <InfoBlock label="MES NOTES" value={b.notes} accent />}
+              {b.added && (
+                <div style={{ fontSize: 12, color: "var(--ink4)", marginTop: 14 }}>
+                  Ajouté le {new Date(b.added).toLocaleDateString("fr-FR")}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
+                {b.vivino_url && (
+                  <a href={b.vivino_url} target="_blank" rel="noopener noreferrer"
+                    style={{
+                      flex: 1, textAlign: "center", padding: "12px", borderRadius: 10,
+                      fontSize: 14, fontWeight: 500, textDecoration: "none",
+                      background: "var(--cream2)", color: "var(--ink2)"
+                    }}>🔗 Voir sur Vivino</a>
+                )}
+                <button onClick={() => { if (confirm("Retirer cette bouteille ?")) removeBottle(modal.cell); }}
+                  style={{
+                    padding: "12px 20px", borderRadius: 10, fontSize: 14, fontWeight: 500,
+                    background: "#FDEDEC", color: "#C0392B"
+                  }}>🗑 Retirer</button>
               </div>
-
-              <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
-                {/* Rack dimensions */}
-                <label style={{ fontSize:13,color:"rgba(232,221,208,0.6)",fontWeight:600 }}>Dimensions du rack</label>
-                <div style={{ display:"flex",gap:10,alignItems:"center" }}>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:11,color:"rgba(232,221,208,0.4)",marginBottom:3 }}>Colonnes</div>
-                    <input type="number" min={1} max={20} style={S.input} value={editCfg.cols}
-                      onChange={e=>setEditCfg(c=>({...c,cols:Math.max(1,Math.min(20,parseInt(e.target.value)||1))}))} />
-                  </div>
-                  <div style={{ color:"rgba(232,221,208,0.3)",fontSize:18,paddingTop:16 }}>×</div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:11,color:"rgba(232,221,208,0.4)",marginBottom:3 }}>Rangées</div>
-                    <input type="number" min={1} max={20} style={S.input} value={editCfg.rows}
-                      onChange={e=>setEditCfg(c=>({...c,rows:Math.max(1,Math.min(20,parseInt(e.target.value)||1))}))} />
-                  </div>
-                </div>
-                <div style={{ fontSize:11,color:"rgba(232,221,208,0.3)" }}>Capacité : {editCfg.cols*editCfg.rows} bouteilles</div>
-
-                {/* Backend URL */}
-                <div style={{ marginTop:6 }}>
-                  <label style={{ fontSize:13,color:"rgba(232,221,208,0.6)",fontWeight:600,display:"block",marginBottom:6 }}>
-                    Serveur backup (optionnel)
-                  </label>
-                  <input style={S.input} value={editCfg.backendUrl}
-                    onChange={e=>setEditCfg(c=>({...c,backendUrl:e.target.value}))} placeholder="https://ma-cave-api.onrender.com" />
-                  <div style={{ fontSize:11,color:"rgba(232,221,208,0.3)",marginTop:4,lineHeight:1.4 }}>
-                    💡 Par défaut, la recherche Vivino passe par un proxy CORS direct (aucun serveur requis).
-                    Si ça ne fonctionne pas, mets ici l'URL de ton backend Render comme fallback.
-                  </div>
-                </div>
-
-                {/* Connection test */}
-                <button style={{...S.btn,...S.dark,fontSize:13,padding:"8px 16px"}} onClick={async () => {
-                  // Test proxy
-                  let ok = false;
-                  try {
-                    const r = await fetch(CORS_PROXIES[0]("https://www.vivino.com/api/explore/explore?q=test&country_code=FR&page=1"), { signal: AbortSignal.timeout(6000) });
-                    ok = r.ok;
-                  } catch {}
-                  if (ok) { flash("✅ Proxy CORS OK — recherche directe fonctionnelle !"); return; }
-                  // Test backend
-                  if (editCfg.backendUrl) {
-                    try {
-                      const r = await fetch(`${editCfg.backendUrl}/health`, { signal: AbortSignal.timeout(12000) });
-                      if (r.ok) { flash("✅ Backend OK (proxy CORS down, le backup prend le relais)"); return; }
-                    } catch {}
-                    flash("❌ Proxy CORS et backend injoignables");
-                  } else {
-                    flash("⚠️ Proxy CORS down — configurez un backend Render");
-                  }
-                }}>🔌 Tester la connexion</button>
-
-                {/* Import/Export */}
-                <div style={{ marginTop:4 }}>
-                  <label style={{ fontSize:13,color:"rgba(232,221,208,0.6)",fontWeight:600,display:"block",marginBottom:6 }}>Import / Export</label>
-                  <div style={{ display:"flex",gap:8 }}>
-                    <button style={{...S.btn,...S.dark,flex:1,fontSize:13}} onClick={() => {
-                      const data = JSON.stringify({bottles,config}, null, 2);
-                      const blob = new Blob([data], {type:"application/json"});
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url; a.download = `ma-cave-${new Date().toISOString().slice(0,10)}.json`;
-                      a.click(); URL.revokeObjectURL(url);
-                      flash("Export téléchargé");
-                    }}>📤 Exporter</button>
-                    <button style={{...S.btn,...S.dark,flex:1,fontSize:13}} onClick={() => {
-                      const input = document.createElement("input");
-                      input.type = "file"; input.accept = ".json";
-                      input.onchange = (e) => {
-                        const file = e.target.files[0]; if(!file) return;
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          try {
-                            const d = JSON.parse(ev.target.result);
-                            if(d.bottles) setBottles(d.bottles);
-                            if(d.config) { setConfig(d.config); setEditCfg(d.config); }
-                            flash("Import réussi !");
-                          } catch { flash("Fichier invalide"); }
-                        };
-                        reader.readAsText(file);
-                      };
-                      input.click();
-                    }}>📥 Importer</button>
-                  </div>
-                </div>
-
-                {/* Save / Reset */}
-                <div style={{ display:"flex",gap:8,marginTop:10 }}>
-                  <button style={{...S.btn,...S.gold,flex:1}} onClick={() => {
-                    setConfig(editCfg); flash("Réglages sauvegardés"); setView("rack");
-                  }}>💾 Sauvegarder</button>
-                  <button style={{...S.btn,...S.danger}} onClick={() => {
-                    if(confirm("⚠️ Vider toute la cave ?")){ setBottles({}); flash("Cave vidée"); setView("rack"); }
-                  }}>🗑 Vider</button>
-                </div>
-              </div>
-            </Modal>
-          )}
-
-          {/* Toast */}
-          {toast && <div style={{
-            position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",
-            background:"rgba(196,154,43,0.92)",color:"#1A1018",padding:"10px 24px",
-            borderRadius:24,fontWeight:600,fontSize:14,zIndex:999,backdropFilter:"blur(8px)",
-            animation:"fadeIn 0.2s ease"
-          }}>{toast}<style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}}`}</style></div>}
-        </div>
-      );
-    }
-
-    // ════════════════════════════════════════════
-    //  COMPOSANTS
-    // ════════════════════════════════════════════
-
-    function HdrBtn({ active, onClick, children }) {
-      return <button onClick={onClick} style={{
-        width:36,height:36,borderRadius:"50%",border:"1px solid rgba(255,255,255,0.12)",
-        background:active?"rgba(196,154,43,0.2)":"rgba(255,255,255,0.06)",
-        color:"#C49A2B",cursor:"pointer",fontSize:17,display:"flex",alignItems:"center",justifyContent:"center"
-      }}>{children}</button>;
-    }
-
-    function FilterPill({ active, onClick, label, color }) {
-      return <button onClick={onClick} style={{
-        padding:"4px 12px",borderRadius:16,fontSize:12,fontWeight:600,fontFamily:"inherit",
-        border:active?`1px solid ${color}66`:"1px solid rgba(255,255,255,0.08)",
-        background:active?`${color}22`:"rgba(255,255,255,0.04)",
-        color:active?color:"rgba(232,221,208,0.5)",cursor:"pointer",whiteSpace:"nowrap",transition:"all 0.15s"
-      }}>{label}</button>;
-    }
-
-    function CloseBtn({ onClick, style: s }) {
-      return <button onClick={onClick} style={{
-        background:"none",border:"none",color:"rgba(232,221,208,0.5)",fontSize:22,cursor:"pointer",
-        width:36,height:36,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",...s
-      }}>✕</button>;
-    }
-
-    function Modal({ children, onClose, bg, noPad }) {
-      return (
-        <div onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{
-          position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(6px)",
-          zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center",animation:"fadeIn 0.2s ease"
-        }}>
-          <div style={{
-            width:"100%",maxWidth:480,maxHeight:"88vh",overflowY:"auto",
-            background:bg||"linear-gradient(180deg,#1E1620,#161012)",
-            borderRadius:"18px 18px 0 0", padding:noPad?0:"20px 18px",
-            border:"1px solid rgba(196,154,43,0.15)",borderBottom:"none",animation:"slideUp 0.25s ease"
-          }}>
-            {children}
-          </div>
-          <style>{`@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}`}</style>
-        </div>
-      );
-    }
-
-    function WineCard({ wine: w, onClick }) {
-      const tc = TYPE_CONFIG[w.type] || TYPE_CONFIG.rouge;
-      return (
-        <div onClick={onClick} style={{
-          display:"flex",gap:12,padding:10,borderRadius:10,cursor:"pointer",
-          background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",
-          marginBottom:7,transition:"all 0.15s"
-        }}>
-          {w.image && <img src={w.image} alt="" style={{ width:46,height:65,objectFit:"contain",borderRadius:5,flexShrink:0,background:"rgba(255,255,255,0.06)" }} />}
-          <div style={{ flex:1,minWidth:0 }}>
-            <div style={{ fontSize:14,fontWeight:600,color:"#E8DDD0",marginBottom:2 }}>{w.name}</div>
-            {w.winery && <div style={{ fontSize:11,color:"rgba(232,221,208,0.4)",marginBottom:2 }}>{w.winery}</div>}
-            <div style={{ fontSize:11,color:"rgba(232,221,208,0.45)",display:"flex",gap:6,flexWrap:"wrap" }}>
-              {w.vintage && <span>{w.vintage}</span>}
-              {w.region && <span>· {w.region}</span>}
-              <span>· {tc.icon} {tc.label}</span>
             </div>
-            <div style={{ display:"flex",gap:8,marginTop:4,fontSize:11 }}>
-              {w.rating && <span style={{ color:"#C49A2B" }}>★ {w.rating}</span>}
-              {w.price && <span style={{ color:"rgba(232,221,208,0.45)" }}>{w.price}</span>}
-            </div>
-          </div>
-          <div style={{ color:"rgba(196,154,43,0.5)",fontSize:18,alignSelf:"center" }}>+</div>
-        </div>
-      );
-    }
+          </Sheet>
+        );
+      })()}
 
-    function ManualForm({ form, setForm, onAdd }) {
-      const si = { background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",color:"#E8DDD0",padding:"10px 14px",borderRadius:6,fontFamily:"inherit",fontSize:15,width:"100%",outline:"none" };
-      const currentRegions = TYPE_CONFIG[form.type]?.regions || REGIONS_ROUGE;
-      return (
-        <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
-          <div>
-            <div style={{ fontSize:11,color:"rgba(232,221,208,0.45)",marginBottom:3 }}>Nom du vin *</div>
-            <input style={si} value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Château Margaux" />
-          </div>
-          <div style={{ display:"flex",gap:10 }}>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:11,color:"rgba(232,221,208,0.45)",marginBottom:3 }}>Millésime</div>
-              <input type="number" style={si} value={form.vintage} onChange={e=>setForm(f=>({...f,vintage:e.target.value}))} placeholder="2020" />
-            </div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:11,color:"rgba(232,221,208,0.45)",marginBottom:3 }}>Type *</div>
-              <select style={{...si,appearance:"auto"}} value={form.type} onChange={e=>{
-                const t=e.target.value;
-                setForm(f=>({...f,type:t,region:Object.keys(TYPE_CONFIG[t].regions)[0]}));
-              }}>
-                {Object.entries(TYPE_CONFIG).map(([k,v])=><option key={k} value={k}>{v.icon} {v.label}</option>)}
-              </select>
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize:11,color:"rgba(232,221,208,0.45)",marginBottom:3 }}>Région</div>
-            <select style={{...si,appearance:"auto"}} value={form.region} onChange={e=>setForm(f=>({...f,region:e.target.value}))}>
-              {Object.keys(currentRegions).map(r=><option key={r} value={r}>{r}</option>)}
-            </select>
-          </div>
-          <div>
-            <div style={{ fontSize:11,color:"rgba(232,221,208,0.45)",marginBottom:3 }}>URL image (optionnel)</div>
-            <input style={si} value={form.image} onChange={e=>setForm(f=>({...f,image:e.target.value}))} placeholder="https://..." />
-          </div>
-          <div>
-            <div style={{ fontSize:11,color:"rgba(232,221,208,0.45)",marginBottom:3 }}>Notes perso</div>
-            <textarea rows={2} style={{...si,resize:"vertical"}} value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="Notes..." />
-          </div>
-          <button disabled={!form.name.trim()} onClick={()=>onAdd({
-            name:form.name,vintage:form.vintage||null,type:form.type,region:form.region,
-            image:form.image||null,notes:form.notes||null,rating:null,price:null,vivino_url:null
-          })} style={{
-            padding:"12px 20px",border:"none",borderRadius:6,cursor:"pointer",fontFamily:"inherit",fontSize:15,fontWeight:600,
-            background:"linear-gradient(135deg,#C49A2B,#A07818)",color:"#1A1018",marginTop:4,opacity:form.name.trim()?1:0.5
-          }}>Ajouter à la cave</button>
-        </div>
-      );
-    }
-
-    function ToggleBtn({ active, onClick, children }) {
-      return <button onClick={onClick} style={{
-        flex:1,padding:"8px 14px",borderRadius:6,border:active?"1px solid rgba(196,154,43,0.3)":"1px solid rgba(255,255,255,0.08)",
-        background:active?"rgba(196,154,43,0.2)":"rgba(255,255,255,0.06)",
-        color:active?"#C49A2B":"rgba(232,221,208,0.5)",cursor:"pointer",fontFamily:"inherit",fontSize:13,fontWeight:600
-      }}>{children}</button>;
-    }
-
-    function StatBox({ label, value, accent }) {
-      return (
-        <div style={{ flex:1,background:"rgba(255,255,255,0.04)",padding:"10px 14px",borderRadius:8,textAlign:"center" }}>
-          <div style={{ fontSize:22,fontWeight:700,color:accent?"#C49A2B":"#E8DDD0" }}>{value}</div>
-          <div style={{ fontSize:10,color:"rgba(232,221,208,0.35)",marginTop:2 }}>{label}</div>
-        </div>
-      );
-    }
-
-    function InfoRow({ label, value, accent }) {
-      return (
+      {/* Toast */}
+      {toast && (
         <div style={{
-          marginBottom:10,padding:"8px 12px",borderRadius:6,
-          background:accent?"rgba(196,154,43,0.06)":"rgba(255,255,255,0.03)",
-          border:accent?"1px solid rgba(196,154,43,0.1)":"none"
-        }}>
-          <div style={{ fontSize:10,color:accent?"rgba(196,154,43,0.6)":"rgba(232,221,208,0.35)",marginBottom:2 }}>{label}</div>
-          <div style={{ fontSize:13,color:"rgba(232,221,208,0.65)",lineHeight:1.4 }}>{value}</div>
-        </div>
-      );
-    }
+          position: "fixed", bottom: 80, left: "50%", transform: "translateX(-50%)", zIndex: 200,
+          background: "var(--burgundy)", color: "#fff", padding: "11px 26px", borderRadius: 28,
+          fontWeight: 600, fontSize: 14, animation: "popIn 0.2s ease", whiteSpace: "nowrap",
+          boxShadow: "0 6px 24px rgba(74,14,27,0.3)"
+        }}>{toast}</div>
+      )}
+    </div>
+  );
+}
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
+/* ══════════════════════════════════════════════════════════
+   COMPONENTS
+   ══════════════════════════════════════════════════════════ */
+
+function TabBtn({ active, icon, label, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+      padding: "10px 0 6px", background: "none",
+      color: active ? "var(--burgundy)" : "var(--ink4)",
+      fontSize: 10, fontWeight: active ? 700 : 400,
+      transition: "color 0.15s"
+    }}>
+      <span style={{ fontSize: 20, lineHeight: 1 }}>{icon}</span>{label}
+    </button>
+  );
+}
+
+function Chip({ active, onClick, label, color, count }) {
+  const c = color || "var(--burgundy)";
+  return (
+    <button onClick={onClick} style={{
+      padding: "5px 12px", borderRadius: 20, fontSize: 12, fontWeight: 500, fontFamily: "inherit",
+      whiteSpace: "nowrap", transition: "all 0.15s",
+      background: active ? c : "var(--cream2)",
+      color: active ? "#fff" : "var(--ink3)",
+      border: "none",
+      boxShadow: active ? `0 2px 8px ${c}33` : "none"
+    }}>
+      {label}{count > 0 && !active ? ` (${count})` : ""}
+    </button>
+  );
+}
+
+function Btn({ variant, children, style: s, ...props }) {
+  const styles = {
+    primary: { background: "var(--burgundy)", color: "#fff", padding: "13px 20px", borderRadius: 12, fontSize: 15, fontWeight: 600 },
+    light: { background: "var(--cream2)", color: "var(--ink2)", padding: "13px 20px", borderRadius: 12, fontSize: 14, fontWeight: 500 },
+    danger: { background: "#FDEDEC", color: "#C0392B", padding: "13px 20px", borderRadius: 12, fontSize: 15, fontWeight: 600 },
+  };
+  return <button style={{ ...styles[variant], ...s }} {...props}>{children}</button>;
+}
+
+function Sheet({ children, onClose, noPad }) {
+  return (
+    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
+      zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center",
+      animation: "fadeIn 0.15s"
+    }}>
+      <div style={{
+        width: "100%", maxWidth: 500, maxHeight: "92vh", overflowY: "auto",
+        background: "var(--cream)", borderRadius: "22px 22px 0 0",
+        padding: noPad ? 0 : "20px 18px",
+        boxShadow: "0 -8px 40px rgba(0,0,0,0.12)",
+        animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)"
+      }}>{children}</div>
+    </div>
+  );
+}
+
+function SheetHeader({ title, sub, onClose }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+      <div>
+        <h2 style={{ fontSize: 20, fontWeight: 700 }}>{title}</h2>
+        {sub && <div style={{ fontSize: 12, color: "var(--ink4)", marginTop: 3 }}>{sub}</div>}
+      </div>
+      <button onClick={onClose} style={{
+        width: 36, height: 36, borderRadius: "50%", background: "var(--cream2)",
+        color: "var(--ink3)", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center"
+      }}>✕</button>
+    </div>
+  );
+}
+
+function Toggle({ active, children, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      flex: 1, padding: "11px", borderRadius: 10, fontSize: 13, fontWeight: 600, fontFamily: "inherit",
+      background: active ? "var(--burgundy)" : "var(--cream2)",
+      color: active ? "#fff" : "var(--ink3)",
+      transition: "all 0.15s"
+    }}>{children}</button>
+  );
+}
+
+function Loader({ status }) {
+  return (
+    <div style={{ textAlign: "center", padding: 30, color: "var(--ink4)" }}>
+      <div style={{
+        width: 30, height: 30, border: "3px solid var(--cream3)", borderTopColor: "var(--burgundy)",
+        borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 14px"
+      }} />
+      <div style={{ fontSize: 14 }}>
+        {status === "proxy" ? "Recherche sur Vivino..." : "Connexion au serveur backup..."}
+      </div>
+    </div>
+  );
+}
+
+function WineCard({ wine: w, onClick }) {
+  const tc = TYPE_CFG[w.type] || TYPE_CFG.rouge;
+  return (
+    <div className="wine-card" onClick={onClick} style={{
+      display: "flex", gap: 12, padding: 12, borderRadius: 14, cursor: "pointer",
+      background: "#fff", border: "1px solid var(--cream3)", marginBottom: 8,
+      transition: "all 0.15s", boxShadow: "0 1px 4px rgba(0,0,0,0.04)"
+    }}>
+      {w.image && (
+        <img src={w.image} alt="" style={{
+          width: 44, height: 66, objectFit: "contain", borderRadius: 6, flexShrink: 0,
+          background: "var(--cream2)"
+        }} />
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 2,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+        }}>{w.name}</div>
+        {w.winery && <div style={{ fontSize: 12, color: "var(--ink4)", marginBottom: 3 }}>{w.winery}</div>}
+        <div style={{ fontSize: 12, color: "var(--ink3)", display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {w.vintage && <span>{w.vintage}</span>}
+          {w.region && <span>· {w.region}</span>}
+          <span>· {tc.icon} {tc.label}</span>
+        </div>
+        <div style={{ display: "flex", gap: 8, marginTop: 5, fontSize: 12 }}>
+          {w.rating && <span style={{ color: "var(--gold)", fontWeight: 600 }}>★ {w.rating}</span>}
+          {w.price && <span style={{ color: "var(--ink4)" }}>{w.price}</span>}
+        </div>
+      </div>
+      <div style={{ color: "var(--burgundy)", fontSize: 24, alignSelf: "center", fontWeight: 300, opacity: 0.5 }}>+</div>
+    </div>
+  );
+}
+
+function ManualForm({ form, setForm, regions, onAdd }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <Fld label="Nom du vin *">
+        <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Château Margaux" />
+      </Fld>
+      <div style={{ display: "flex", gap: 10 }}>
+        <Fld label="Millésime" s={{ flex: 1 }}>
+          <input type="number" value={form.vintage} onChange={e => setForm(f => ({ ...f, vintage: e.target.value }))} placeholder="2020" />
+        </Fld>
+        <Fld label="Type *" s={{ flex: 1 }}>
+          <select value={form.type} onChange={e => {
+            const t = e.target.value;
+            const defRegs = Object.keys(DEFAULT_REGION_COLORS[t] || {});
+            setForm(f => ({ ...f, type: t, region: defRegs[0] || "Autre" }));
+          }}>
+            {Object.entries(TYPE_CFG).map(([k, v]) => <option key={k} value={k}>{v.icon} {v.label}</option>)}
+          </select>
+        </Fld>
+      </div>
+      <Fld label="Région">
+        <div style={{ display: "flex", gap: 8 }}>
+          <select value={regions.includes(form.region) ? form.region : "__custom"} onChange={e => {
+            if (e.target.value !== "__custom") setForm(f => ({ ...f, region: e.target.value }));
+          }} style={{ flex: 1 }}>
+            {regions.map(r => <option key={r} value={r}>{r}</option>)}
+            <option value="__custom">✏️ Autre (saisir)</option>
+          </select>
+          {!regions.includes(form.region) && (
+            <input value={form.region} onChange={e => setForm(f => ({ ...f, region: e.target.value }))}
+              placeholder="Nouvelle région..." style={{ flex: 1 }} />
+          )}
+        </div>
+      </Fld>
+      <div style={{ display: "flex", gap: 10 }}>
+        <Fld label="Apogée début" s={{ flex: 1 }}>
+          <input type="number" value={form.apogee_start} onChange={e => setForm(f => ({ ...f, apogee_start: e.target.value }))} placeholder="2025" />
+        </Fld>
+        <Fld label="Apogée fin" s={{ flex: 1 }}>
+          <input type="number" value={form.apogee_end} onChange={e => setForm(f => ({ ...f, apogee_end: e.target.value }))} placeholder="2035" />
+        </Fld>
+      </div>
+      <Fld label="URL image (optionnel)">
+        <input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." />
+      </Fld>
+      <Fld label="Notes personnelles">
+        <textarea rows={2} style={{ resize: "vertical" }} value={form.notes}
+          onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+          placeholder="Goût, occasion, accord mets-vin..." />
+      </Fld>
+      <Btn variant="primary" disabled={!form.name.trim()} style={{ marginTop: 4, opacity: form.name.trim() ? 1 : 0.4 }}
+        onClick={() => onAdd({
+          name: form.name, vintage: form.vintage ? Number(form.vintage) : null,
+          type: form.type, region: form.region || "Autre",
+          image: form.image || null, notes: form.notes || null,
+          rating: null, price: null, vivino_url: null,
+          apogee_start: form.apogee_start ? Number(form.apogee_start) : null,
+          apogee_end: form.apogee_end ? Number(form.apogee_end) : null,
+          winery: "", grape: null, description: null, region_raw: form.region || "Autre"
+        })}>
+        Ajouter à la cave
+      </Btn>
+    </div>
+  );
+}
+
+function Fld({ label, children, s }) {
+  return (
+    <div style={s}>
+      <div style={{ fontSize: 12, color: "var(--ink4)", marginBottom: 5, fontWeight: 600 }}>{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function InfoBlock({ label, value, accent, highlight }) {
+  return (
+    <div style={{
+      marginBottom: 10, padding: "10px 14px", borderRadius: 10,
+      background: accent ? "#FFF8E1" : highlight ? "#E8F5E9" : "var(--cream2)",
+      border: highlight ? "1px solid #C8E6C9" : "none"
+    }}>
+      <div style={{
+        fontSize: 10, fontWeight: 700, letterSpacing: 0.5, marginBottom: 3,
+        color: accent ? "var(--gold)" : highlight ? "#2E7D32" : "var(--ink4)"
+      }}>{label}</div>
+      <div style={{ fontSize: 13, color: "var(--ink2)", lineHeight: 1.5 }}>{value}</div>
+    </div>
+  );
+}
+
+function MetricCard({ icon, value, label }) {
+  return (
+    <div style={{
+      background: "#fff", borderRadius: 14, padding: "18px 14px", textAlign: "center",
+      boxShadow: "var(--shadow)", border: "1px solid var(--cream3)"
+    }}>
+      <div style={{ fontSize: 14, marginBottom: 6 }}>{icon}</div>
+      <div style={{ fontSize: 24, fontWeight: 700, color: "var(--burgundy)", fontFamily: "'Libre Baskerville', serif" }}>{value}</div>
+      <div style={{ fontSize: 11, color: "var(--ink4)", marginTop: 4 }}>{label}</div>
+    </div>
+  );
+}
+
+function CardSection({ title, children }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>{title}</h3>
+      <div style={{
+        background: "#fff", borderRadius: 14, padding: "16px",
+        boxShadow: "var(--shadow)", border: "1px solid var(--cream3)"
+      }}>{children}</div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
 </body>
 </html>
