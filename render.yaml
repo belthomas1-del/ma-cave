@@ -2,9 +2,9 @@ services:
   - type: web
     name: ma-cave-api
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn server:app --bind 0.0.0.0:$PORT
     plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 2 --timeout 30
     envVars:
       - key: PYTHON_VERSION
-        value: "3.11"
+        value: "3.11.0"
