@@ -3,29 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#0C0A08">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <title>Ma Cave</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
-body{font-family:'DM Sans',system-ui,sans-serif;background:#0A0A0C;color:#E8E0D4;font-size:15px;line-height:1.5}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:#0C0A08;color:#E8E0D4;font-size:15px;line-height:1.5}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(200,170,120,0.15);border-radius:4px}
-h1,h2,h3,.serif{font-family:'DM Serif Display',Georgia,serif}
+::-webkit-scrollbar-thumb{background:rgba(180,140,80,0.15);border-radius:4px}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,serif}
 input,select,textarea{font-family:inherit;font-size:15px;outline:none}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes glow{0%,100%{opacity:0.4}50%{opacity:0.8}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(200,168,85,0)}50%{box-shadow:0 0 0 6px rgba(200,168,85,0.25)}}
+@keyframes bottlePlace{from{opacity:0;transform:scale(0.5) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
 </style>
 </head>
 <body>
@@ -37,24 +37,22 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <script type="text/babel">
 const{useState,useEffect,useMemo,useCallback,useRef}=React;
 
-/* ═══════════ PALETTE ═══════════ */
 const P={
-  bg:"#0A0A0C",bg1:"#111114",bg2:"#18181C",bg3:"#222228",
-  card:"rgba(255,255,255,0.025)",cardH:"rgba(255,255,255,0.045)",cardB:"rgba(255,255,255,0.06)",
-  ink:"#E8E0D4",ink2:"#B8AFA0",ink3:"#787068",ink4:"#484440",
-  gold:"#C8A855",goldDim:"rgba(200,168,85,0.12)",goldGlow:"rgba(200,168,85,0.06)",
-  wine:"#8B2842",wineLt:"rgba(139,40,66,0.12)",wineGlow:"rgba(139,40,66,0.08)",
-  ok:"#4CAF50",okBg:"rgba(76,175,80,0.08)",
-  danger:"#E57373",dangerBg:"rgba(229,115,115,0.08)",
-  glass:"rgba(255,255,255,0.03)",glassBd:"rgba(255,255,255,0.06)",
-  blur:"blur(40px)",
+  bg:"#0C0A08",bg1:"#13110E",bg2:"#1A1714",bg3:"#242018",bg4:"#302A20",
+  card:"rgba(255,245,230,0.025)",cardH:"rgba(255,245,230,0.05)",cardB:"rgba(255,245,230,0.06)",
+  ink:"#EDE5D8",ink2:"#BDB5A4",ink3:"#8A8272",ink4:"#585040",
+  gold:"#C9A84C",goldDim:"rgba(201,168,76,0.12)",goldGlow:"rgba(201,168,76,0.06)",
+  wine:"#7B2038",wineLt:"rgba(123,32,56,0.15)",
+  ok:"#6DAF6D",okBg:"rgba(109,175,109,0.1)",
+  danger:"#D46A6A",dangerBg:"rgba(212,106,106,0.1)",
+  glass:"rgba(255,250,240,0.03)",glassBd:"rgba(255,250,240,0.06)",
 };
 
 const TP={
-  rouge:{l:"Rouge",ic:"🍷",c:"#9B2335",bg:"rgba(155,35,53,0.1)",grad:"linear-gradient(135deg,#6B1525,#9B2335,#7B1D2D)"},
-  blanc:{l:"Blanc",ic:"🥂",c:"#C8A830",bg:"rgba(200,168,48,0.1)",grad:"linear-gradient(135deg,#8B7A18,#C8A830,#A89020)"},
-  rose:{l:"Rosé",ic:"🌸",c:"#D4789A",bg:"rgba(212,120,154,0.1)",grad:"linear-gradient(135deg,#A05878,#D4789A,#B86888)"},
-  petillant:{l:"Pétillant",ic:"✨",c:"#D4B855",bg:"rgba(212,184,85,0.1)",grad:"linear-gradient(135deg,#A89830,#D4B855,#B8A838)"},
+  rouge:{l:"Rouge",ic:"🍷",c:"#9B2335",bg:"rgba(155,35,53,0.12)",grad:"linear-gradient(180deg,#5A0F1E,#8B1A30,#6A1525)",capC:"#6B0F1E"},
+  blanc:{l:"Blanc",ic:"🥂",c:"#C5A830",bg:"rgba(197,168,48,0.12)",grad:"linear-gradient(180deg,#7A6A10,#B8A020,#8B7A18)",capC:"#7A6A10"},
+  rose:{l:"Rosé",ic:"🌸",c:"#D4789A",bg:"rgba(212,120,154,0.12)",grad:"linear-gradient(180deg,#8A4060,#C06888,#A05878)",capC:"#8A4060"},
+  petillant:{l:"Pétillant",ic:"✨",c:"#D4B855",bg:"rgba(212,184,85,0.12)",grad:"linear-gradient(180deg,#8A8020,#C8B040,#A89830)",capC:"#8A8020"},
 };
 
 const RC={rouge:{"Bordeaux":"#5A1020","Bourgogne":"#7A1838","Rhône":"#6A1818","Loire":"#8A3838","Languedoc":"#6E2525","Beaujolais":"#A02848","Provence":"#7A3535","Sud-Ouest":"#7A3232","Italie":"#6B2020","Espagne":"#8A2020","Autre":"#5A2222"},
@@ -64,13 +62,11 @@ const RC={rouge:{"Bordeaux":"#5A1020","Bourgogne":"#7A1838","Rhône":"#6A1818","
 
 function wineColor(b){return b?(RC[b.type]||{})[b.region]||TP[b.type]?.c||"#9B2335":null}
 function classify(id){return{1:"rouge",2:"blanc",3:"petillant",4:"rose",7:"rose"}[id]||"rouge"}
-function mapReg(n){if(!n)return"Autre";const r=n.toLowerCase();const m={"bordeaux":"Bordeaux","bourgogne":"Bourgogne","burgundy":"Bourgogne","rhône":"Rhône","rhone":"Rhône","loire":"Loire","alsace":"Alsace","champagne":"Champagne","languedoc":"Languedoc","roussillon":"Languedoc","provence":"Provence","beaujolais":"Beaujolais","sud-ouest":"Sud-Ouest","jura":"Jura","toscana":"Italie","tuscany":"Italie","piemonte":"Italie","rioja":"Espagne","ribera":"Espagne"};for(const[k,v]of Object.entries(m))if(r.includes(k))return v;return n.length>2?n:"Autre"}
+function mapReg(n){if(!n)return"Autre";const r=n.toLowerCase();const m={"bordeaux":"Bordeaux","bourgogne":"Bourgogne","burgundy":"Bourgogne","rhône":"Rhône","rhone":"Rhône","loire":"Loire","alsace":"Alsace","champagne":"Champagne","languedoc":"Languedoc","roussillon":"Languedoc","provence":"Provence","beaujolais":"Beaujolais","sud-ouest":"Sud-Ouest","jura":"Jura","toscana":"Italie","tuscany":"Italie","piemonte":"Italie","veneto":"Italie","rioja":"Espagne","ribera":"Espagne","priorat":"Espagne"};for(const[k,v]of Object.entries(m))if(r.includes(k))return v;return n.length>2?n:"Autre"}
 
-/* ═══════════ STORAGE ═══════════ */
-const SK="cave-v9",load=()=>{try{return JSON.parse(localStorage.getItem(SK))||{}}catch{return{}}},save=d=>{try{localStorage.setItem(SK,JSON.stringify(d))}catch{}};
+const SK="cave-v8",load=()=>{try{return JSON.parse(localStorage.getItem(SK))||{}}catch{return{}}},save=d=>{try{localStorage.setItem(SK,JSON.stringify(d))}catch{}};
 
-/* ═══════════ SEARCH ═══════════ */
-function parseBE(r){return{name:r.name,winery:r.winery||"",vintage:r.vintage||null,type:classify(r.type_id),region:mapReg(r.region),region_raw:r.region||"",rating:r.rating,price:r.price,image:r.image||null,grape:r.grape||null,description:r.description||null,vivino_url:r.seo_name?("https://www.vivino.com/"+r.seo_name):null,notes:null,apogee_start:null,apogee_end:null}}
+function parseBE(r){return{name:r.name,winery:r.winery||"",vintage:r.vintage||null,type:classify(r.type_id),region:mapReg(r.region),region_raw:r.region||"",rating:r.rating,ratings_count:r.ratings_count||null,price:r.price,image:r.image||null,grape:r.grape||null,description:r.description||null,food:r.food||null,body_desc:r.body_desc||null,acidity_desc:r.acidity_desc||null,vivino_url:r.vivino_url||(r.seo_name?("https://www.vivino.com/"+r.seo_name):null),notes:null,apogee_start:null,apogee_end:null}}
 
 async function doSearch(q,url,onLog){
   const log=onLog||(()=>{});
@@ -85,18 +81,17 @@ async function doSearch(q,url,onLog){
   }catch(e){log("❌ "+(e.name==="AbortError"?"Timeout — réessayez":e.message))}
   return null}
 
-/* ═══════════ APP ═══════════ */
 function App(){
   const sv=load();
   const[bottles,setBottles]=useState(sv.bottles||{});
-  const[config,setConfig]=useState({cols:10,rows:6,backendUrl:"",view:"list",...(sv.config||{})});
+  const[config,setConfig]=useState({cols:10,rows:6,backendUrl:"https://ma-cave-api.bellon-thomas1.workers.dev",view:"rack",...(sv.config||{})});
   const[tab,setTab]=useState("cave");
   const[modal,setModal]=useState(null);
   const[query,setQuery]=useState("");
   const[results,setResults]=useState([]);
   const[searching,setSearching]=useState(false);
   const[dbgLog,setDbgLog]=useState([]);
-  const[manual,setManual]=useState(false);
+  const[addMode,setAddMode]=useState("vivino");
   const[form,setForm]=useState(ef());
   const[eCfg,setECfg]=useState(config);
   const[toast,setToast]=useState(null);
@@ -105,20 +100,43 @@ function App(){
   const[fQ,setFQ]=useState("");
   const[fApo,setFApo]=useState(false);
   const[showF,setShowF]=useState(false);
+  const[moveMode,setMoveMode]=useState(null);
+  const[editMode,setEditMode]=useState(false);
   const mainRef=useRef(null);
 
   useEffect(()=>{save({bottles,config})},[bottles,config]);
-  function ef(){return{name:"",vintage:"",type:"rouge",region:"Bordeaux",notes:"",image:"",apogee_start:"",apogee_end:""}}
+  function ef(){return{name:"",winery:"",vintage:"",type:"rouge",region:"Bordeaux",notes:"",image:"",apogee_start:"",apogee_end:"",rating:"",price:"",grape:"",description:"",food:"",vivino_url:"",region_raw:""}}
   const flash=m=>{setToast(m);setTimeout(()=>setToast(null),2200)};
   const ck=(c,r)=>c+"-"+r;
-  const closeM=()=>{setModal(null);setQuery("");setResults([]);setManual(false);setForm(ef());setDbgLog([])};
+  const closeM=()=>{setModal(null);setQuery("");setResults([]);setAddMode("vivino");setForm(ef());setDbgLog([]);setEditMode(false)};
 
   const runS=async()=>{if(!query.trim())return;setSearching(true);setResults([]);const logs=[];
     const r=await doSearch(query.trim(),config.backendUrl,m=>{logs.push(m);setDbgLog([...logs])});
     if(r)setResults(r.results);setSearching(false)};
 
+  const prefillFromVivino=(w)=>{
+    setForm({name:w.name||"",winery:w.winery||"",vintage:w.vintage?String(w.vintage):"",type:w.type||"rouge",
+      region:w.region||"Autre",notes:"",image:w.image||"",apogee_start:"",apogee_end:"",
+      rating:w.rating?String(w.rating):"",price:w.price||"",grape:w.grape||"",description:w.description||"",
+      food:w.food||"",vivino_url:w.vivino_url||"",region_raw:w.region_raw||""});
+    setAddMode("edit");
+  };
+
+  const formToBottle=(f)=>({
+    name:f.name,winery:f.winery||"",vintage:f.vintage?Number(f.vintage):null,
+    type:f.type,region:f.region||"Autre",region_raw:f.region_raw||f.region||"",
+    image:f.image||null,notes:f.notes||null,
+    rating:f.rating?Number(f.rating):null,price:f.price||null,
+    grape:f.grape||null,description:f.description||null,
+    food:f.food||null,vivino_url:f.vivino_url||null,
+    apogee_start:f.apogee_start?Number(f.apogee_start):null,
+    apogee_end:f.apogee_end?Number(f.apogee_end):null,
+  });
+
   const addB=(key,data)=>{setBottles(p=>({...p,[key]:{...data,added:new Date().toISOString()}}));flash("✓ Ajouté");closeM()};
+  const updateB=(key,data)=>{setBottles(p=>({...p,[key]:{...p[key],...data}}));flash("✓ Modifié");setEditMode(false)};
   const rmB=key=>{setBottles(p=>{const n={...p};delete n[key];return n});flash("Retiré");closeM()};
+  const moveB=(fromKey,toKey)=>{setBottles(p=>{const n={...p};n[toKey]=n[fromKey];delete n[fromKey];return n});setMoveMode(null);flash("✓ Déplacé")};
   const firstEmpty=()=>{for(let r=0;r<config.rows;r++)for(let c=0;c<config.cols;c++){const k=ck(c,r);if(!bottles[k])return k}return null};
 
   const allB=Object.values(bottles);
@@ -138,16 +156,15 @@ function App(){
     if(fQ){const q=fQ.toLowerCase();if(!b.name.toLowerCase().includes(q)&&!(b.winery||"").toLowerCase().includes(q)&&!(b.vintage+"").includes(q))return false}
     if(fApo){if(!b.apogee_start&&!b.apogee_end)return false;if(yr<(b.apogee_start||0)||yr>(b.apogee_end||9999))return false}return true};
 
-  const CW=46,CH=40;
-  const is={background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",color:P.ink,padding:"12px 16px",borderRadius:12,width:"100%",fontSize:15,transition:"border 0.2s"};
+  const is={background:"rgba(255,245,230,0.04)",border:"1px solid rgba(255,245,230,0.08)",color:P.ink,padding:"12px 16px",borderRadius:12,width:"100%",fontSize:15,transition:"border 0.2s"};
+  const CW=52,CH=50;
 
   return(
   <div style={{height:"100dvh",display:"flex",flexDirection:"column",background:P.bg,position:"relative",overflow:"hidden"}}>
-    {/* Ambient light */}
-    <div style={{position:"fixed",top:"-30%",left:"-20%",width:"60%",height:"60%",background:"radial-gradient(circle,rgba(139,40,66,0.06) 0%,transparent 70%)",pointerEvents:"none",zIndex:0}}/>
-    <div style={{position:"fixed",bottom:"-20%",right:"-20%",width:"50%",height:"50%",background:"radial-gradient(circle,rgba(200,168,85,0.04) 0%,transparent 70%)",pointerEvents:"none",zIndex:0}}/>
+    <div style={{position:"fixed",top:"-30%",left:"-10%",width:"50%",height:"50%",background:"radial-gradient(circle,rgba(180,120,40,0.04) 0%,transparent 70%)",pointerEvents:"none",zIndex:0}}/>
+    <div style={{position:"fixed",bottom:"-20%",right:"-15%",width:"45%",height:"45%",background:"radial-gradient(circle,rgba(120,30,50,0.04) 0%,transparent 70%)",pointerEvents:"none",zIndex:0}}/>
 
-    {/* ═══ HEADER ═══ */}
+    {/* HEADER */}
     <header style={{padding:"20px 20px 14px",position:"relative",zIndex:2,flexShrink:0}}>
       <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between"}}>
         <div>
@@ -157,23 +174,27 @@ function App(){
             <span style={{fontSize:12,color:P.ink3,fontWeight:400,letterSpacing:1,textTransform:"uppercase"}}>{stats.total} bouteille{stats.total!==1?"s":""}</span>
           </div>
           {stats.total>0&&<div style={{marginTop:8,display:"flex",alignItems:"center",gap:8}}>
-            <div style={{flex:1,maxWidth:120,height:2,background:P.bg3,borderRadius:1,overflow:"hidden"}}>
-              <div style={{height:"100%",width:Math.round(stats.total/cap*100)+"%",background:`linear-gradient(90deg,${P.wine},${P.gold})`,borderRadius:1,transition:"width 0.6s"}}/>
+            <div style={{flex:1,maxWidth:120,height:3,background:P.bg3,borderRadius:2,overflow:"hidden"}}>
+              <div style={{height:"100%",width:Math.min(100,Math.round(stats.total/cap*100))+"%",background:`linear-gradient(90deg,${P.wine},${P.gold})`,borderRadius:2,transition:"width 0.6s"}}/>
             </div>
             <span style={{fontSize:11,color:P.ink4}}>{Math.round(stats.total/cap*100)}%</span>
           </div>}
         </div>
         {tab==="cave"&&<div style={{display:"flex",gap:6}}>
+          {moveMode&&<button onClick={()=>setMoveMode(null)} style={{padding:"6px 14px",borderRadius:10,fontSize:12,fontWeight:600,background:P.dangerBg,color:P.danger,border:"1px solid rgba(212,106,106,0.2)"}}>✕ Annuler</button>}
           <Btn ic={config.view==="list"?"⊞":"☰"} ck={()=>setConfig(c=>({...c,view:c.view==="list"?"rack":"list"}))}/>
           <Btn ic={isF?"⚡":"⌕"} on={showF||isF} ck={()=>setShowF(f=>!f)}/>
         </div>}
       </div>
+      {moveMode&&<div style={{marginTop:10,padding:"8px 14px",borderRadius:10,background:"rgba(201,168,76,0.1)",border:"1px solid rgba(201,168,76,0.2)",fontSize:13,color:P.gold,animation:"fadeIn 0.2s"}}>
+        📦 Tapez une case vide pour déplacer <strong>{bottles[moveMode]?.name?.substring(0,25)}</strong>
+      </div>}
     </header>
 
-    {/* ═══ FILTERS ═══ */}
+    {/* FILTERS */}
     {showF&&tab==="cave"&&<div style={{padding:"0 20px 14px",flexShrink:0,animation:"slideDown 0.15s",zIndex:2,position:"relative"}}>
-      <div style={{background:P.glass,backdropFilter:P.blur,border:"1px solid "+P.glassBd,borderRadius:16,padding:14}}>
-        <input value={fQ} onChange={e=>setFQ(e.target.value)} placeholder="Rechercher un vin..." style={{...is,marginBottom:10,background:"rgba(255,255,255,0.03)",padding:"10px 14px",fontSize:14}}/>
+      <div style={{background:P.glass,backdropFilter:"blur(40px)",border:"1px solid "+P.glassBd,borderRadius:16,padding:14}}>
+        <input value={fQ} onChange={e=>setFQ(e.target.value)} placeholder="Rechercher un vin..." style={{...is,marginBottom:10,background:"rgba(255,245,230,0.03)",padding:"10px 14px",fontSize:14}}/>
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
           {Object.entries(TP).map(([k,v])=><Tag key={k} on={fType===k} ck={()=>setFType(f=>f===k?null:k)} c={v.c}>{v.ic} {v.l}{stats.types[k]?" · "+stats.types[k]:""}</Tag>)}
         </div>
@@ -187,25 +208,23 @@ function App(){
       </div>
     </div>}
 
-    {/* ═══ MAIN ═══ */}
+    {/* MAIN */}
     <main ref={mainRef} style={{flex:1,overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1}}>
 
       {tab==="cave"&&<div style={{padding:"0 20px 100px"}}>
-        {/* ADD BUTTON */}
-        {firstEmpty()&&<button onClick={()=>{setForm(ef());setModal({type:"add",cell:firstEmpty()})}}
+        {firstEmpty()&&!moveMode&&<button onClick={()=>{setForm(ef());setAddMode("vivino");setModal({type:"add",cell:firstEmpty()})}}
           style={{width:"100%",padding:16,borderRadius:16,fontSize:15,fontWeight:600,marginBottom:16,
-            background:`linear-gradient(135deg,${P.wine} 0%,#6B1525 100%)`,color:"#F0D8DC",
-            boxShadow:"0 4px 24px rgba(139,40,66,0.3),inset 0 1px 0 rgba(255,255,255,0.1)",
-            display:"flex",alignItems:"center",justifyContent:"center",gap:10,transition:"transform 0.15s",
-            border:"1px solid rgba(255,200,200,0.1)"}}>
+            background:`linear-gradient(135deg,${P.wine} 0%,#4A0A18 100%)`,color:"#F0D8DC",
+            boxShadow:"0 4px 24px rgba(123,32,56,0.3),inset 0 1px 0 rgba(255,255,255,0.08)",
+            display:"flex",alignItems:"center",justifyContent:"center",gap:10,
+            border:"1px solid rgba(255,200,200,0.08)"}}>
           <span style={{fontSize:22,fontWeight:300}}>+</span> Ajouter une bouteille
         </button>}
 
-        {/* EMPTY STATE */}
         {allB.length===0&&<div style={{textAlign:"center",padding:"80px 20px",animation:"fadeIn 0.4s"}}>
-          <div style={{fontSize:72,marginBottom:20,animation:"float 4s ease-in-out infinite",filter:"drop-shadow(0 8px 20px rgba(139,40,66,0.2))"}}>🍷</div>
+          <div style={{fontSize:72,marginBottom:20,animation:"float 4s ease-in-out infinite",filter:"drop-shadow(0 8px 20px rgba(123,32,56,0.2))"}}>🍷</div>
           <div className="serif" style={{fontSize:24,color:P.ink,marginBottom:8}}>Votre cave est vide</div>
-          <div style={{fontSize:14,color:P.ink3,maxWidth:260,margin:"0 auto",lineHeight:1.6}}>Commencez par ajouter votre première bouteille avec la recherche Vivino</div>
+          <div style={{fontSize:14,color:P.ink3,maxWidth:260,margin:"0 auto",lineHeight:1.6}}>Commencez par ajouter votre première bouteille</div>
         </div>}
 
         {/* LIST VIEW */}
@@ -213,31 +232,27 @@ function App(){
           const tc=TP[b.type]||TP.rouge,color=wineColor(b);
           const atApo=b.apogee_start&&b.apogee_end&&yr>=b.apogee_start&&yr<=b.apogee_end;
           return(
-            <div key={key} onClick={()=>setModal({type:"detail",cell:key})}
+            <div key={key} onClick={()=>{if(moveMode){if(moveMode!==key&&!bottles[key])moveB(moveMode,key);return}setModal({type:"detail",cell:key})}}
               style={{display:"flex",gap:14,padding:14,borderRadius:18,marginBottom:10,cursor:"pointer",
-                background:P.card,border:"1px solid "+P.cardB,
-                backdropFilter:"blur(10px)",
+                background:moveMode===key?"rgba(201,168,76,0.08)":P.card,
+                border:"1px solid "+(moveMode===key?"rgba(201,168,76,0.2)":P.cardB),
                 animation:`fadeIn 0.3s ${i*0.04}s both`,
-                position:"relative",overflow:"hidden",transition:"background 0.2s"}}>
-              {/* Accent line */}
+                position:"relative",overflow:"hidden",transition:"all 0.2s"}}>
               <div style={{position:"absolute",left:0,top:8,bottom:8,width:3,borderRadius:2,background:color}}/>
-              {/* Bottle image */}
               <div style={{width:52,height:76,borderRadius:12,flexShrink:0,overflow:"hidden",marginLeft:6,
                 background:b.image?P.bg2:tc.grad,display:"flex",alignItems:"center",justifyContent:"center",
                 boxShadow:"0 4px 12px rgba(0,0,0,0.2)"}}>
-                {b.image?<img src={b.image} alt="" style={{width:"100%",height:"100%",objectFit:"contain"}}
-                  onError={e=>{e.target.style.display="none";e.target.parentElement.style.background=tc.grad}}/>
+                {b.image?<img src={b.image} alt="" style={{width:"100%",height:"100%",objectFit:"contain"}} onError={e=>{e.target.style.display="none";e.target.parentElement.style.background=tc.grad}}/>
                   :<span style={{fontSize:24,opacity:0.6}}>{tc.ic}</span>}
               </div>
-              {/* Info */}
               <div style={{flex:1,minWidth:0,display:"flex",flexDirection:"column",justifyContent:"center",gap:3}}>
                 <div style={{fontSize:15,fontWeight:600,color:P.ink,lineHeight:1.3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.name}</div>
                 {b.winery&&<div style={{fontSize:12,color:P.ink3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.winery}</div>}
                 <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",fontSize:12,marginTop:2}}>
-                  {b.vintage&&<span style={{color:P.gold,fontWeight:600,fontFamily:"'DM Serif Display',serif"}}>{b.vintage}</span>}
+                  {b.vintage&&<span style={{color:P.gold,fontWeight:600,fontFamily:"'Playfair Display',serif"}}>{b.vintage}</span>}
                   <span style={{color:P.ink4}}>·</span>
                   <span style={{color:P.ink3}}>{b.region}</span>
-                  <span style={{background:tc.bg,color:tc.c,padding:"2px 8px",borderRadius:8,fontSize:10,fontWeight:600,letterSpacing:0.3}}>{tc.l.toUpperCase()}</span>
+                  <span style={{background:tc.bg,color:tc.c,padding:"2px 8px",borderRadius:8,fontSize:10,fontWeight:600}}>{tc.l.toUpperCase()}</span>
                   {atApo&&<span style={{background:P.okBg,color:P.ok,padding:"2px 8px",borderRadius:8,fontSize:10,fontWeight:600}}>APOGÉE</span>}
                 </div>
                 {(b.rating||b.price)&&<div style={{display:"flex",gap:10,marginTop:2,fontSize:12}}>
@@ -245,53 +260,98 @@ function App(){
                   {b.price&&<span style={{color:P.ink4}}>{b.price}</span>}
                 </div>}
               </div>
-              <div style={{fontSize:10,color:P.ink4,fontWeight:500,alignSelf:"flex-start",fontFamily:"monospace",letterSpacing:0.5}}>
-                {parseInt(key.split("-")[0])+1}{String.fromCharCode(65+parseInt(key.split("-")[1]))}
-              </div>
+              <div style={{fontSize:10,color:P.ink4,fontWeight:500,alignSelf:"flex-start",fontFamily:"monospace"}}>{parseInt(key.split("-")[0])+1}{String.fromCharCode(65+parseInt(key.split("-")[1]))}</div>
             </div>
           )})}
 
         {/* RACK VIEW */}
         {config.view==="rack"&&<div style={{marginTop:4}}>
-          <div style={{background:"linear-gradient(180deg,#3A2A1A,#2A1A0E 50%,#221508)",borderRadius:16,padding:"8px 6px",
-            boxShadow:"0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(180,140,80,0.08)",overflowX:"auto",position:"relative",
-            backgroundImage:"repeating-linear-gradient(0deg,transparent 0px,transparent 5px,rgba(30,15,5,0.12) 5px,rgba(30,15,5,0.12) 6px)"}}>
-            <div style={{display:"flex",paddingLeft:22,marginBottom:2}}>
-              {Array.from({length:config.cols},(_,c)=><div key={c} style={{width:CW,minWidth:CW,textAlign:"center",fontSize:8,color:"rgba(200,160,100,0.25)",fontWeight:700}}>{c+1}</div>)}
+          <div style={{
+            background:`linear-gradient(180deg,#4A3620 0%,#3A2815 8%,#2E1E0E 50%,#3A2815 92%,#4A3620 100%)`,
+            borderRadius:14,padding:"10px 8px 4px",
+            boxShadow:"0 10px 40px rgba(0,0,0,0.5),inset 0 2px 0 rgba(200,160,100,0.1),inset 0 -2px 0 rgba(0,0,0,0.3)",
+            overflowX:"auto",position:"relative",border:"1px solid rgba(120,80,40,0.2)",
+          }}>
+            <div style={{position:"absolute",inset:0,borderRadius:14,opacity:0.05,
+              backgroundImage:"repeating-linear-gradient(90deg,transparent 0px,transparent 3px,rgba(255,200,100,0.4) 3px,rgba(255,200,100,0.4) 4px,transparent 4px,transparent 22px)",
+              pointerEvents:"none"}}/>
+
+            <div style={{display:"flex",paddingLeft:26,marginBottom:4}}>
+              {Array.from({length:config.cols},(_,c)=>
+                <div key={c} style={{width:CW,minWidth:CW,textAlign:"center",fontSize:9,color:"rgba(200,160,100,0.3)",fontWeight:700,fontFamily:"monospace"}}>{c+1}</div>
+              )}
             </div>
+
             {Array.from({length:config.rows},(_,r)=>
-              <div key={r} style={{display:"flex",alignItems:"center"}}>
-                <div style={{width:20,textAlign:"center",fontSize:8,color:"rgba(200,160,100,0.25)",fontWeight:700,flexShrink:0}}>{String.fromCharCode(65+r)}</div>
-                {Array.from({length:config.cols},(_,c)=>{
-                  const key=ck(c,r),b=bottles[key],color=wineColor(b);
-                  const dim=isF&&b&&!mF(b);
-                  return<div key={key} onClick={()=>{if(b)setModal({type:"detail",cell:key});else{setForm(ef());setModal({type:"add",cell:key})}}}
-                    style={{width:CW,height:CH,minWidth:CW,cursor:"pointer",border:"1px solid rgba(80,50,25,0.4)",
-                      background:"rgba(0,0,0,0.15)",boxShadow:"inset 0 3px 8px rgba(0,0,0,0.3)",
-                      opacity:dim?0.15:1,display:"flex",alignItems:"center",justifyContent:"center",transition:"opacity 0.2s"}}>
-                    {b?<div style={{width:CW-8,height:CH-6,borderRadius:5,background:color,
-                      boxShadow:"inset 0 -2px 4px rgba(0,0,0,0.3),0 1px 4px rgba(0,0,0,0.2)",
-                      position:"relative",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                      {b.image&&<img src={b.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.7,borderRadius:5}} onError={e=>{e.target.style.display="none"}}/>}
-                      <span style={{position:"absolute",fontSize:9,fontWeight:800,color:"#fff",textShadow:"0 1px 3px rgba(0,0,0,0.8)"}}>{b.vintage?String(b.vintage).slice(2):""}</span>
-                    </div>
-                    :<div style={{width:10,height:10,border:"1px dashed rgba(120,80,40,0.1)",borderRadius:"50%"}}/>}
-                  </div>})}
+              <div key={r}>
+                <div style={{display:"flex",alignItems:"center"}}>
+                  <div style={{width:24,textAlign:"center",fontSize:9,color:"rgba(200,160,100,0.3)",fontWeight:700,flexShrink:0,fontFamily:"monospace"}}>{String.fromCharCode(65+r)}</div>
+                  {Array.from({length:config.cols},(_,c)=>{
+                    const key=ck(c,r),b=bottles[key],color=wineColor(b);
+                    const dim=isF&&b&&!mF(b);
+                    const isMoveSrc=moveMode===key;
+                    const isMoveTarget=moveMode&&!b&&moveMode!==key;
+                    const tc=b?TP[b.type]||TP.rouge:null;
+                    return<div key={key}
+                      onClick={()=>{
+                        if(moveMode){if(!b&&moveMode!==key)moveB(moveMode,key);else if(moveMode===key)setMoveMode(null);return}
+                        if(b)setModal({type:"detail",cell:key});
+                        else{setForm(ef());setAddMode("vivino");setModal({type:"add",cell:key})}
+                      }}
+                      style={{
+                        width:CW,height:CH,minWidth:CW,cursor:"pointer",position:"relative",
+                        background:isMoveTarget?"rgba(201,168,76,0.08)":"radial-gradient(ellipse at center,rgba(0,0,0,0.35) 0%,rgba(0,0,0,0.2) 70%,rgba(20,12,5,0.1) 100%)",
+                        boxShadow:isMoveTarget?"inset 0 0 12px rgba(201,168,76,0.15)":"inset 0 3px 8px rgba(0,0,0,0.4),inset 0 -1px 2px rgba(0,0,0,0.2)",
+                        border:isMoveTarget?"1px solid rgba(201,168,76,0.3)":"1px solid rgba(60,40,20,0.5)",
+                        borderTop:"1px solid rgba(80,55,30,0.4)",borderBottom:"1px solid rgba(20,10,5,0.6)",
+                        opacity:dim?0.15:isMoveSrc?0.4:1,
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        transition:"all 0.2s",animation:isMoveTarget?"pulseGlow 1.5s infinite":"none",
+                      }}>
+                      {b&&<div style={{width:CW-10,height:CH-8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",animation:"bottlePlace 0.3s",position:"relative"}}>
+                        <div style={{width:8,height:5,background:tc?.capC||"#5A0F1E",borderRadius:"2px 2px 0 0",boxShadow:"0 -1px 2px rgba(0,0,0,0.3)",flexShrink:0}}/>
+                        <div style={{width:8,height:7,background:`linear-gradient(180deg,${color}CC,${color}88)`,flexShrink:0}}/>
+                        <div style={{width:CW-14,height:CH-22,borderRadius:"4px 4px 3px 3px",
+                          background:`linear-gradient(135deg,${color} 0%,${color}CC 40%,${color}88 100%)`,
+                          boxShadow:`inset -4px 0 8px rgba(0,0,0,0.3),inset 2px 0 4px rgba(255,255,255,0.08),0 2px 6px rgba(0,0,0,0.4)`,
+                          position:"relative",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                          <div style={{position:"absolute",top:0,left:"15%",width:"25%",height:"100%",
+                            background:"linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.02),transparent)",borderRadius:2}}/>
+                          <div style={{width:"80%",height:"55%",background:"rgba(255,250,240,0.85)",borderRadius:2,
+                            display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 1px 2px rgba(0,0,0,0.2)"}}>
+                            <span style={{fontSize:7,fontWeight:800,color:"#2A1A0A",fontFamily:"'Playfair Display',serif",textAlign:"center",lineHeight:1,padding:"0 2px"}}>
+                              {b.vintage?String(b.vintage).slice(2):"·"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>}
+                      {!b&&!isMoveTarget&&<div style={{width:6,height:6,borderRadius:"50%",border:"1px dashed rgba(100,70,40,0.15)"}}/>}
+                      {isMoveTarget&&<span style={{fontSize:14,opacity:0.5,color:P.gold}}>↓</span>}
+                    </div>})}
+                </div>
+                <div style={{marginLeft:24,height:6,
+                  background:"linear-gradient(180deg,#5A4228 0%,#4A3420 40%,#3A2515 100%)",
+                  borderRadius:"0 0 2px 2px",
+                  boxShadow:"0 3px 6px rgba(0,0,0,0.4),inset 0 1px 0 rgba(200,160,100,0.12)",position:"relative"}}>
+                  <div style={{position:"absolute",inset:0,opacity:0.08,
+                    backgroundImage:"repeating-linear-gradient(90deg,transparent 0px,transparent 8px,rgba(255,200,100,0.3) 8px,rgba(255,200,100,0.3) 9px)"}}/>
+                </div>
               </div>
             )}
           </div>
-          <div style={{display:"flex",gap:12,justifyContent:"center",marginTop:14,flexWrap:"wrap"}}>
-            {Object.entries(TP).map(([k,v])=>stats.types[k]?<div key={k} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:P.ink3}}>
-              <div style={{width:8,height:8,borderRadius:2,background:v.c}}/>{v.l} ({stats.types[k]})
+          <div style={{display:"flex",gap:14,justifyContent:"center",marginTop:14,flexWrap:"wrap"}}>
+            {Object.entries(TP).map(([k,v])=>stats.types[k]?<div key={k} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:P.ink3}}>
+              <div style={{width:10,height:14,borderRadius:2,background:v.c,boxShadow:"inset -2px 0 3px rgba(0,0,0,0.3)"}}/>
+              {v.l} ({stats.types[k]})
             </div>:null)}
           </div>
         </div>}
       </div>}
 
-      {/* ═══ STATS ═══ */}
+      {/* STATS */}
       {tab==="stats"&&<div style={{padding:"10px 20px 100px",animation:"fadeIn 0.2s"}}>
         <h2 className="serif" style={{fontSize:28,marginBottom:24,color:P.ink,fontWeight:400}}>Statistiques</h2>
-        {stats.total===0?<div style={{textAlign:"center",padding:"60px 20px",color:P.ink4}}><div style={{fontSize:48,marginBottom:16}}>🍇</div>Cave vide</div>:<>
+        {stats.total===0?<div style={{textAlign:"center",padding:"60px 20px",color:P.ink4}}>Cave vide</div>:<>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:24}}>
             <Stat v={stats.total} l="Bouteilles" ic="🍾"/>
             <Stat v={Math.round(stats.total/cap*100)+"%"} l="Remplie" ic="📊"/>
@@ -300,23 +360,22 @@ function App(){
           </div>
           <Sec t="Répartition">{Object.entries(TP).map(([k,v])=>{const n=stats.types[k]||0;if(!n)return null;const p=Math.round(n/stats.total*100);
             return<div key={k} style={{marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                 <span style={{fontSize:14,display:"flex",alignItems:"center",gap:8}}><span>{v.ic}</span><span style={{fontWeight:500}}>{v.l}</span></span>
                 <span style={{fontSize:13,color:P.ink3}}>{n} · {p}%</span>
               </div>
               <div style={{height:4,background:P.bg3,borderRadius:2,overflow:"hidden"}}>
-                <div style={{height:"100%",width:p+"%",background:`linear-gradient(90deg,${v.c},${v.c}88)`,borderRadius:2,transition:"width 0.8s cubic-bezier(0.4,0,0.2,1)"}}/>
-              </div>
-            </div>})}</Sec>
+                <div style={{height:"100%",width:p+"%",background:`linear-gradient(90deg,${v.c},${v.c}88)`,borderRadius:2,transition:"width 0.8s"}}/>
+              </div></div>})}</Sec>
           <Sec t="Régions">{Object.entries(stats.regions).sort((a,b)=>b[1]-a[1]).map(([r,n])=>
-            <div key={r} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid "+P.bg3}}>
+            <div key={r} style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderBottom:"1px solid "+P.bg3}}>
               <span style={{fontSize:14}}>{r}</span>
-              <span style={{fontSize:12,fontWeight:700,color:P.gold,background:P.goldDim,padding:"3px 12px",borderRadius:10,minWidth:28,textAlign:"center"}}>{n}</span>
+              <span style={{fontSize:12,fontWeight:700,color:P.gold,background:P.goldDim,padding:"3px 12px",borderRadius:10}}>{n}</span>
             </div>)}</Sec>
         </>}
       </div>}
 
-      {/* ═══ SETTINGS ═══ */}
+      {/* SETTINGS */}
       {tab==="settings"&&<div style={{padding:"10px 20px 100px",animation:"fadeIn 0.2s"}}>
         <h2 className="serif" style={{fontSize:28,marginBottom:24,color:P.ink,fontWeight:400}}>Réglages</h2>
         <Sec t="📐 Dimensions du casier">
@@ -330,10 +389,6 @@ function App(){
         </Sec>
         <Sec t="🔍 Serveur de recherche">
           <input value={eCfg.backendUrl} style={is} onChange={e=>setECfg(c=>({...c,backendUrl:e.target.value}))} placeholder="https://ma-cave-api.xxx.workers.dev"/>
-          <div style={{marginTop:12,padding:14,borderRadius:12,background:P.bg2,fontSize:13,color:P.ink3,lineHeight:1.7,border:"1px solid "+P.bg3}}>
-            Collez l'URL de votre Cloudflare Worker.<br/>
-            <strong style={{color:P.ink2}}>Premier appel ≈ 2-5s</strong> (cold start Workers).
-          </div>
           {eCfg.backendUrl&&<button onClick={async()=>{try{const r=await fetch(eCfg.backendUrl+"/health",{signal:AbortSignal.timeout(15000)});if(r.ok){flash("✅ Connecté !");return}}catch{}flash("❌ Serveur inaccessible")}}
             style={{marginTop:10,padding:12,borderRadius:12,fontSize:14,fontWeight:500,background:P.bg3,color:P.ink2,width:"100%"}}>🔌 Tester la connexion</button>}
         </Sec>
@@ -347,70 +402,83 @@ function App(){
         </Sec>
         <div style={{display:"flex",gap:10,marginTop:24}}>
           <button onClick={()=>{setConfig(eCfg);flash("Sauvegardé");setTab("cave")}}
-            style={{flex:1,padding:16,borderRadius:14,fontSize:15,fontWeight:600,background:`linear-gradient(135deg,${P.wine},#6B1525)`,color:"#F0D8DC",boxShadow:"0 4px 20px rgba(139,40,66,0.3)",border:"1px solid rgba(255,200,200,0.08)"}}>💾 Sauvegarder</button>
+            style={{flex:1,padding:16,borderRadius:14,fontSize:15,fontWeight:600,background:`linear-gradient(135deg,${P.wine},#4A0A18)`,color:"#F0D8DC",boxShadow:"0 4px 20px rgba(123,32,56,0.3)",border:"1px solid rgba(255,200,200,0.08)"}}>💾 Sauvegarder</button>
           <button onClick={()=>{if(confirm("Vider toute la cave ?")){setBottles({});flash("Cave vidée")}}}
             style={{padding:"16px 20px",borderRadius:14,fontSize:15,background:P.dangerBg,color:P.danger}}>🗑</button>
         </div>
       </div>}
     </main>
 
-    {/* ═══ NAV ═══ */}
-    <nav style={{position:"fixed",bottom:0,left:0,right:0,zIndex:50,
-      background:"linear-gradient(180deg,transparent,#0A0A0C 30%)",
-      paddingTop:24,paddingBottom:"max(8px,env(safe-area-inset-bottom))"}}>
-      <div style={{display:"flex",maxWidth:320,margin:"0 auto",background:P.bg2,borderRadius:20,padding:4,
-        border:"1px solid "+P.bg3,boxShadow:"0 -4px 24px rgba(0,0,0,0.3)"}}>
+    {/* NAV */}
+    <nav style={{position:"fixed",bottom:0,left:0,right:0,zIndex:50,background:"linear-gradient(180deg,transparent,#0C0A08 30%)",paddingTop:24,paddingBottom:"max(8px,env(safe-area-inset-bottom))"}}>
+      <div style={{display:"flex",maxWidth:320,margin:"0 auto",background:P.bg2,borderRadius:20,padding:4,border:"1px solid "+P.bg3,boxShadow:"0 -4px 24px rgba(0,0,0,0.3)"}}>
         <NavBtn on={tab==="cave"} ic="🍷" lb="Cave" ck={()=>setTab("cave")}/>
         <NavBtn on={tab==="stats"} ic="📊" lb="Stats" ck={()=>setTab("stats")}/>
         <NavBtn on={tab==="settings"} ic="⚙️" lb="Réglages" ck={()=>{setECfg(config);setTab("settings")}}/>
       </div>
     </nav>
 
-    {/* ═══ ADD MODAL ═══ */}
+    {/* ADD MODAL */}
     {modal?.type==="add"&&<Overlay cls={closeM}>
       <div style={{padding:"24px 20px 32px"}}>
         <MHead t="Ajouter" s={"Emplacement "+(parseInt(modal.cell.split("-")[0])+1)+String.fromCharCode(65+parseInt(modal.cell.split("-")[1]))} cls={closeM}/>
-        <div style={{display:"flex",gap:6,marginBottom:18,background:P.bg2,borderRadius:12,padding:3}}>
-          <TabBtn on={!manual} ck={()=>setManual(false)}>🔍 Vivino</TabBtn>
-          <TabBtn on={manual} ck={()=>setManual(true)}>✏️ Manuel</TabBtn>
-        </div>
-        {!manual&&<>
+        {addMode!=="edit"&&<div style={{display:"flex",gap:6,marginBottom:18,background:P.bg2,borderRadius:12,padding:3}}>
+          <TabBtn on={addMode==="vivino"} ck={()=>setAddMode("vivino")}>🔍 Vivino</TabBtn>
+          <TabBtn on={addMode==="manual"} ck={()=>{setAddMode("manual");setForm(ef())}}>✏️ Manuel</TabBtn>
+        </div>}
+        {addMode==="edit"&&<div style={{marginBottom:14}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+            <button onClick={()=>{setAddMode("vivino");setForm(ef())}} style={{fontSize:13,color:P.ink3}}>← Retour</button>
+            <span style={{fontSize:14,color:P.gold,fontWeight:600}}>Vérifiez & complétez les infos</span>
+          </div>
+        </div>}
+        {addMode==="vivino"&&<>
           <div style={{display:"flex",gap:8,marginBottom:14}}>
             <input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runS()} placeholder="Château Margaux 2015..." style={{...is,flex:1}}/>
-            <button onClick={runS} disabled={searching} style={{minWidth:52,borderRadius:12,background:`linear-gradient(135deg,${P.wine},#6B1525)`,color:"#F0D8DC",fontSize:14,fontWeight:600,opacity:searching?0.5:1}}>
-              {searching?"⏳":"→"}
-            </button>
+            <button onClick={runS} disabled={searching} style={{minWidth:52,borderRadius:12,background:`linear-gradient(135deg,${P.wine},#4A0A18)`,color:"#F0D8DC",fontSize:14,fontWeight:600,opacity:searching?0.5:1}}>{searching?"⏳":"→"}</button>
           </div>
           {searching&&<div style={{textAlign:"center",padding:30,color:P.ink3}}>
-            <div style={{width:24,height:24,border:"2px solid "+P.bg3,borderTopColor:P.gold,borderRadius:"50%",animation:"spin 0.7s linear infinite",margin:"0 auto 14px"}}/>
-            Recherche en cours...
-          </div>}
+            <div style={{width:24,height:24,border:"2px solid "+P.bg3,borderTopColor:P.gold,borderRadius:"50%",animation:"spin 0.7s linear infinite",margin:"0 auto 14px"}}/>Recherche...</div>}
           {dbgLog.length>0&&!searching&&<div style={{marginBottom:12,padding:10,borderRadius:10,background:P.bg2,fontSize:11,color:P.ink3,fontFamily:"monospace",lineHeight:1.8,maxHeight:80,overflowY:"auto"}}>{dbgLog.map((l,i)=><div key={i}>{l}</div>)}</div>}
           {results.length>0&&<div style={{fontSize:12,marginBottom:10,color:P.ok,display:"flex",alignItems:"center",gap:6}}>
             <div style={{width:5,height:5,borderRadius:"50%",background:P.ok}}/>{results.length} résultat{results.length>1?"s":""}
           </div>}
-          {results.map((w,i)=><SrCard key={i} w={w} ck={()=>addB(modal.cell,w)} i={i}/>)}
+          {results.map((w,i)=><SrCard key={i} w={w} ck={()=>prefillFromVivino(w)} i={i}/>)}
         </>}
-        {manual&&<ManualForm f={form} sF={setForm} rg={fRegs} is={is} add={d=>addB(modal.cell,d)}/>}
+        {(addMode==="manual"||addMode==="edit")&&<FullForm f={form} sF={setForm} rg={fRegs} is={is}
+          onSubmit={()=>{if(!form.name.trim())return;addB(modal.cell,formToBottle(form))}} btnLabel="Ajouter à la cave" showVivino={addMode==="edit"}/>}
       </div>
     </Overlay>}
 
-    {/* ═══ DETAIL MODAL ═══ */}
+    {/* DETAIL MODAL */}
     {modal?.type==="detail"&&bottles[modal.cell]&&(()=>{const b=bottles[modal.cell],tc=TP[b.type]||TP.rouge;
       const atApo=b.apogee_start&&b.apogee_end&&yr>=b.apogee_start&&yr<=b.apogee_end;
+
+      if(editMode){
+        const init={name:b.name||"",winery:b.winery||"",vintage:b.vintage?String(b.vintage):"",type:b.type||"rouge",
+          region:b.region||"Autre",notes:b.notes||"",image:b.image||"",
+          apogee_start:b.apogee_start?String(b.apogee_start):"",apogee_end:b.apogee_end?String(b.apogee_end):"",
+          rating:b.rating?String(b.rating):"",price:b.price||"",grape:b.grape||"",
+          description:b.description||"",food:b.food||"",vivino_url:b.vivino_url||"",region_raw:b.region_raw||""};
+        return<Overlay cls={closeM}>
+          <div style={{padding:"24px 20px 32px"}}>
+            <MHead t="Modifier" s={b.name?.substring(0,30)} cls={()=>setEditMode(false)}/>
+            <EditForm init={init} rg={fRegs} is={is}
+              onSave={(f)=>updateB(modal.cell,formToBottle(f))}
+              onCancel={()=>setEditMode(false)}/>
+          </div>
+        </Overlay>}
+
       return<Overlay cls={closeM} noPad>
-        {/* Hero */}
-        <div style={{position:"relative",minHeight:b.image?300:160,
-          background:`linear-gradient(180deg,${tc.bg} 0%,${P.bg} 100%)`,
-          display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+        <div style={{position:"relative",minHeight:b.image?300:160,background:`linear-gradient(180deg,${tc.bg} 0%,${P.bg1} 100%)`,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
           <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 30%,"+tc.c+"15,transparent 70%)"}}/>
           {b.image?<img src={b.image} alt="" style={{maxHeight:280,maxWidth:"45%",objectFit:"contain",filter:"drop-shadow(0 16px 40px rgba(0,0,0,0.4))",position:"relative",zIndex:1}}/>
             :<div style={{fontSize:64,opacity:0.08}}>{tc.ic}</div>}
-          <button onClick={closeM} style={{position:"absolute",top:16,right:16,width:36,height:36,borderRadius:12,background:"rgba(0,0,0,0.3)",backdropFilter:"blur(10px)",color:P.ink2,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",zIndex:2,border:"1px solid rgba(255,255,255,0.06)"}}>✕</button>
+          <button onClick={closeM} style={{position:"absolute",top:16,right:16,width:36,height:36,borderRadius:12,background:"rgba(0,0,0,0.3)",backdropFilter:"blur(10px)",color:P.ink2,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",zIndex:2}}>✕</button>
         </div>
         <div style={{padding:"20px 22px 36px"}}>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
-            <span style={{background:tc.bg,color:tc.c,padding:"4px 14px",borderRadius:10,fontSize:12,fontWeight:600,letterSpacing:0.3}}>{tc.ic} {tc.l.toUpperCase()}</span>
+            <span style={{background:tc.bg,color:tc.c,padding:"4px 14px",borderRadius:10,fontSize:12,fontWeight:600}}>{tc.ic} {tc.l.toUpperCase()}</span>
             <span style={{background:P.goldDim,color:P.gold,padding:"4px 14px",borderRadius:10,fontSize:12,fontWeight:600}}>{b.region}</span>
             {atApo&&<span style={{background:P.okBg,color:P.ok,padding:"4px 14px",borderRadius:10,fontSize:12,fontWeight:600}}>🎯 APOGÉE</span>}
           </div>
@@ -418,7 +486,7 @@ function App(){
           {b.winery&&<div style={{fontSize:14,color:P.ink3,marginBottom:6}}>{b.winery}</div>}
           {b.vintage&&<div className="serif" style={{fontSize:20,color:P.gold,marginBottom:18,fontStyle:"italic"}}>{b.vintage}</div>}
           {(b.rating||b.price)&&<div style={{display:"flex",gap:10,marginBottom:18}}>
-            {b.rating&&<div style={{flex:1,background:P.goldDim,padding:16,borderRadius:14,textAlign:"center",border:"1px solid rgba(200,168,85,0.08)"}}>
+            {b.rating&&<div style={{flex:1,background:P.goldDim,padding:16,borderRadius:14,textAlign:"center"}}>
               <div style={{fontSize:28,fontWeight:700,color:P.gold}}>★ {b.rating}</div>
               <div style={{fontSize:11,color:P.ink4,marginTop:4}}>Vivino</div>
             </div>}
@@ -430,51 +498,120 @@ function App(){
           {b.grape&&<InfoRow l="CÉPAGES" v={b.grape}/>}
           {b.region_raw&&b.region_raw!==b.region&&<InfoRow l="APPELLATION" v={b.region_raw}/>}
           {(b.apogee_start||b.apogee_end)&&<InfoRow l="APOGÉE" v={(b.apogee_start||"?")+" — "+(b.apogee_end||"?")} hl={atApo}/>}
+          {b.description&&<InfoRow l="DESCRIPTION" v={b.description}/>}
+          {b.food&&<InfoRow l="ACCORDS METS" v={b.food}/>}
+          {b.body_desc&&<InfoRow l="CORPS" v={b.body_desc}/>}
+          {b.acidity_desc&&<InfoRow l="ACIDITÉ" v={b.acidity_desc}/>}
           {b.notes&&<InfoRow l="MES NOTES" v={b.notes} accent/>}
           <div style={{display:"flex",gap:8,marginTop:22}}>
+            <button onClick={()=>setEditMode(true)} style={{flex:1,padding:14,borderRadius:14,fontSize:14,fontWeight:500,background:P.goldDim,color:P.gold,border:"1px solid rgba(201,168,76,0.15)"}}>✏️ Modifier</button>
+            <button onClick={()=>{setMoveMode(modal.cell);closeM()}} style={{flex:1,padding:14,borderRadius:14,fontSize:14,fontWeight:500,background:P.bg3,color:P.ink2}}>📦 Déplacer</button>
+          </div>
+          <div style={{display:"flex",gap:8,marginTop:8}}>
             {b.vivino_url&&<a href={b.vivino_url} target="_blank" rel="noopener" style={{flex:1,textAlign:"center",padding:14,borderRadius:14,fontSize:14,fontWeight:500,textDecoration:"none",background:P.bg3,color:P.ink2}}>🔗 Vivino</a>}
             <button onClick={()=>{if(confirm("Retirer cette bouteille ?"))rmB(modal.cell)}} style={{padding:"14px 20px",borderRadius:14,fontSize:14,fontWeight:500,background:P.dangerBg,color:P.danger}}>🗑</button>
           </div>
         </div>
       </Overlay>})()}
 
-    {/* TOAST */}
-    {toast&&<div style={{position:"fixed",bottom:90,left:"50%",transform:"translateX(-50%)",zIndex:200,
-      background:P.gold,color:"#0A0A0C",padding:"10px 28px",borderRadius:24,fontWeight:600,fontSize:14,
-      animation:"scaleIn 0.15s",whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(200,168,85,0.3)"}}>{toast}</div>}
+    {toast&&<div style={{position:"fixed",bottom:90,left:"50%",transform:"translateX(-50%)",zIndex:200,background:P.gold,color:"#0C0A08",padding:"10px 28px",borderRadius:24,fontWeight:600,fontSize:14,animation:"scaleIn 0.15s",whiteSpace:"nowrap",boxShadow:"0 8px 24px rgba(201,168,76,0.3)"}}>{toast}</div>}
   </div>);
 }
 
-/* ═══ COMPONENTS ═══ */
-function Btn({ic,on,ck}){return<button onClick={ck} style={{width:38,height:34,borderRadius:10,background:on?"rgba(200,168,85,0.12)":"rgba(255,255,255,0.04)",color:on?P.gold:P.ink3,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid "+(on?"rgba(200,168,85,0.15)":"rgba(255,255,255,0.06)")}}>{ic}</button>}
-function Tag({on,ck,children,c}){return<button onClick={ck} style={{padding:"5px 12px",borderRadius:10,fontSize:11,fontWeight:600,fontFamily:"inherit",whiteSpace:"nowrap",letterSpacing:0.3,background:on?(c||P.wine)+"20":P.bg3,color:on?(c||P.gold):P.ink3,border:"1px solid "+(on?(c||P.wine)+"30":"transparent"),transition:"all 0.15s"}}>{children}</button>}
-function NavBtn({on,ic,lb,ck}){return<button onClick={ck} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"10px 0 7px",borderRadius:16,background:on?"rgba(200,168,85,0.08)":"transparent",color:on?P.gold:P.ink4,fontSize:10,fontWeight:on?600:400,transition:"all 0.15s"}}><span style={{fontSize:17}}>{ic}</span>{lb}</button>}
-function Overlay({children,cls,noPad}){return<div onClick={e=>{if(e.target===e.currentTarget)cls()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(12px)",zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center",animation:"fadeIn 0.1s"}}><div style={{width:"100%",maxWidth:480,maxHeight:"93vh",overflowY:"auto",background:P.bg1,borderRadius:"24px 24px 0 0",boxShadow:"0 -12px 48px rgba(0,0,0,0.4)",animation:"slideUp 0.25s cubic-bezier(0.22,1,0.36,1)",border:"1px solid rgba(255,255,255,0.04)",borderBottom:"none",...(noPad?{}:{})}}>{children}</div></div>}
+/* FULL FORM */
+function FullForm({f,sF,rg,is,onSubmit,btnLabel,showVivino}){
+  return<div style={{display:"flex",flexDirection:"column",gap:12}}>
+    {showVivino&&f.image&&<div style={{display:"flex",gap:12,padding:12,borderRadius:14,background:"rgba(255,245,230,0.03)",border:"1px solid rgba(255,245,230,0.06)",marginBottom:4}}>
+      <div style={{width:44,height:64,borderRadius:8,overflow:"hidden",flexShrink:0,background:"#1A1714"}}>
+        <img src={f.image} alt="" style={{width:"100%",height:"100%",objectFit:"contain"}}/>
+      </div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:14,fontWeight:600,color:"#EDE5D8",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{f.name}</div>
+        <div style={{fontSize:12,color:"#8A8272"}}>{f.winery}{f.vintage?" · "+f.vintage:""}</div>
+        {f.rating&&<div style={{fontSize:12,color:"#C9A84C",marginTop:2}}>★ {f.rating}{f.price?" · "+f.price:""}</div>}
+      </div>
+    </div>}
+    <Fld l="Nom *"><input value={f.name} style={is} onChange={e=>sF(p=>({...p,name:e.target.value}))} placeholder="Château Margaux"/></Fld>
+    <Fld l="Domaine"><input value={f.winery} style={is} onChange={e=>sF(p=>({...p,winery:e.target.value}))} placeholder="Domaine"/></Fld>
+    <div style={{display:"flex",gap:10}}>
+      <Fld l="Millésime" s={{flex:1}}><input type="number" style={is} value={f.vintage} onChange={e=>sF(p=>({...p,vintage:e.target.value}))} placeholder="2020"/></Fld>
+      <Fld l="Type" s={{flex:1}}><select value={f.type} style={{...is,appearance:"auto"}} onChange={e=>{const t=e.target.value;sF(p=>({...p,type:t,region:Object.keys(RC[t]||{})[0]||"Autre"}))}}>{Object.entries(TP).map(([k,v])=><option key={k} value={k}>{v.ic} {v.l}</option>)}</select></Fld>
+    </div>
+    <Fld l="Région"><select value={rg.includes(f.region)?f.region:"_c"} style={{...is,appearance:"auto"}} onChange={e=>{if(e.target.value!=="_c")sF(p=>({...p,region:e.target.value}));else sF(p=>({...p,region:""}))}}>
+      {rg.map(r=><option key={r} value={r}>{r}</option>)}<option value="_c">✏️ Saisir</option></select>
+      {!rg.includes(f.region)&&<input value={f.region} style={{...is,marginTop:8}} onChange={e=>sF(p=>({...p,region:e.target.value}))} placeholder="Saisir..."/>}
+    </Fld>
+    <div style={{display:"flex",gap:10}}>
+      <Fld l="Note /5" s={{flex:1}}><input type="number" step="0.1" min="0" max="5" style={is} value={f.rating} onChange={e=>sF(p=>({...p,rating:e.target.value}))} placeholder="4.2"/></Fld>
+      <Fld l="Prix" s={{flex:1}}><input style={is} value={f.price} onChange={e=>sF(p=>({...p,price:e.target.value}))} placeholder="25€"/></Fld>
+    </div>
+    <div style={{display:"flex",gap:10}}>
+      <Fld l="Apogée début" s={{flex:1}}><input type="number" style={is} value={f.apogee_start} onChange={e=>sF(p=>({...p,apogee_start:e.target.value}))} placeholder="2025"/></Fld>
+      <Fld l="Apogée fin" s={{flex:1}}><input type="number" style={is} value={f.apogee_end} onChange={e=>sF(p=>({...p,apogee_end:e.target.value}))} placeholder="2035"/></Fld>
+    </div>
+    <Fld l="Cépages"><input style={is} value={f.grape} onChange={e=>sF(p=>({...p,grape:e.target.value}))} placeholder="Cabernet Sauvignon, Merlot"/></Fld>
+    <Fld l="Accords mets"><input style={is} value={f.food} onChange={e=>sF(p=>({...p,food:e.target.value}))} placeholder="Agneau, fromage..."/></Fld>
+    <Fld l="Description"><textarea rows={2} style={{...is,resize:"vertical"}} value={f.description} onChange={e=>sF(p=>({...p,description:e.target.value}))} placeholder="Nez de fruits noirs..."/></Fld>
+    <Fld l="Mes notes"><textarea rows={2} style={{...is,resize:"vertical"}} value={f.notes} onChange={e=>sF(p=>({...p,notes:e.target.value}))} placeholder="Goût, accords perso..."/></Fld>
+    <button onClick={onSubmit} disabled={!f.name.trim()}
+      style={{padding:16,borderRadius:14,fontSize:15,fontWeight:600,background:`linear-gradient(135deg,#7B2038,#4A0A18)`,color:"#F0D8DC",opacity:f.name.trim()?1:0.3,boxShadow:f.name.trim()?"0 4px 20px rgba(123,32,56,0.3)":"none",border:"1px solid rgba(255,200,200,0.08)",marginTop:4}}>{btnLabel||"Ajouter"}</button>
+  </div>}
+
+/* EDIT FORM */
+function EditForm({init,rg,is,onSave,onCancel}){
+  const[f,sF]=useState(init);
+  return<div style={{display:"flex",flexDirection:"column",gap:12}}>
+    <Fld l="Nom *"><input value={f.name} style={is} onChange={e=>sF(p=>({...p,name:e.target.value}))}/></Fld>
+    <Fld l="Domaine"><input value={f.winery} style={is} onChange={e=>sF(p=>({...p,winery:e.target.value}))}/></Fld>
+    <div style={{display:"flex",gap:10}}>
+      <Fld l="Millésime" s={{flex:1}}><input type="number" style={is} value={f.vintage} onChange={e=>sF(p=>({...p,vintage:e.target.value}))}/></Fld>
+      <Fld l="Type" s={{flex:1}}><select value={f.type} style={{...is,appearance:"auto"}} onChange={e=>sF(p=>({...p,type:e.target.value}))}>{Object.entries(TP).map(([k,v])=><option key={k} value={k}>{v.ic} {v.l}</option>)}</select></Fld>
+    </div>
+    <Fld l="Région"><select value={rg.includes(f.region)?f.region:"_c"} style={{...is,appearance:"auto"}} onChange={e=>{if(e.target.value!=="_c")sF(p=>({...p,region:e.target.value}));else sF(p=>({...p,region:""}))}}>
+      {rg.map(r=><option key={r} value={r}>{r}</option>)}<option value="_c">✏️ Saisir</option></select>
+      {!rg.includes(f.region)&&<input value={f.region} style={{...is,marginTop:8}} onChange={e=>sF(p=>({...p,region:e.target.value}))} placeholder="Saisir..."/>}
+    </Fld>
+    <div style={{display:"flex",gap:10}}>
+      <Fld l="Note /5" s={{flex:1}}><input type="number" step="0.1" style={is} value={f.rating} onChange={e=>sF(p=>({...p,rating:e.target.value}))}/></Fld>
+      <Fld l="Prix" s={{flex:1}}><input style={is} value={f.price} onChange={e=>sF(p=>({...p,price:e.target.value}))}/></Fld>
+    </div>
+    <div style={{display:"flex",gap:10}}>
+      <Fld l="Apogée début" s={{flex:1}}><input type="number" style={is} value={f.apogee_start} onChange={e=>sF(p=>({...p,apogee_start:e.target.value}))}/></Fld>
+      <Fld l="Apogée fin" s={{flex:1}}><input type="number" style={is} value={f.apogee_end} onChange={e=>sF(p=>({...p,apogee_end:e.target.value}))}/></Fld>
+    </div>
+    <Fld l="Cépages"><input style={is} value={f.grape} onChange={e=>sF(p=>({...p,grape:e.target.value}))}/></Fld>
+    <Fld l="Accords mets"><input style={is} value={f.food} onChange={e=>sF(p=>({...p,food:e.target.value}))}/></Fld>
+    <Fld l="Description"><textarea rows={2} style={{...is,resize:"vertical"}} value={f.description} onChange={e=>sF(p=>({...p,description:e.target.value}))}/></Fld>
+    <Fld l="Mes notes"><textarea rows={2} style={{...is,resize:"vertical"}} value={f.notes} onChange={e=>sF(p=>({...p,notes:e.target.value}))}/></Fld>
+    <div style={{display:"flex",gap:10}}>
+      <button onClick={()=>onSave(f)} disabled={!f.name.trim()} style={{flex:1,padding:16,borderRadius:14,fontSize:15,fontWeight:600,background:`linear-gradient(135deg,#7B2038,#4A0A18)`,color:"#F0D8DC",opacity:f.name.trim()?1:0.3,border:"1px solid rgba(255,200,200,0.08)"}}>💾 Enregistrer</button>
+      <button onClick={onCancel} style={{padding:"16px 20px",borderRadius:14,fontSize:14,background:"rgba(255,245,230,0.04)",color:"#8A8272",border:"1px solid rgba(255,245,230,0.08)"}}>Annuler</button>
+    </div>
+  </div>}
+
+/* SHARED COMPONENTS */
+function Btn({ic,on,ck}){return<button onClick={ck} style={{width:38,height:34,borderRadius:10,background:on?"rgba(201,168,76,0.12)":"rgba(255,245,230,0.04)",color:on?P.gold:P.ink3,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid "+(on?"rgba(201,168,76,0.15)":"rgba(255,245,230,0.06)")}}>{ic}</button>}
+function Tag({on,ck,children,c}){return<button onClick={ck} style={{padding:"5px 12px",borderRadius:10,fontSize:11,fontWeight:600,fontFamily:"inherit",whiteSpace:"nowrap",letterSpacing:0.3,background:on?(c||P.wine)+"20":"rgba(255,245,230,0.04)",color:on?(c||P.gold):P.ink3,border:"1px solid "+(on?(c||P.wine)+"30":"transparent"),transition:"all 0.15s"}}>{children}</button>}
+function NavBtn({on,ic,lb,ck}){return<button onClick={ck} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"10px 0 7px",borderRadius:16,background:on?"rgba(201,168,76,0.08)":"transparent",color:on?P.gold:P.ink4,fontSize:10,fontWeight:on?600:400,transition:"all 0.15s"}}><span style={{fontSize:17}}>{ic}</span>{lb}</button>}
+function Overlay({children,cls,noPad}){return<div onClick={e=>{if(e.target===e.currentTarget)cls()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(12px)",zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center",animation:"fadeIn 0.1s"}}><div style={{width:"100%",maxWidth:480,maxHeight:"93vh",overflowY:"auto",background:P.bg1,borderRadius:"24px 24px 0 0",boxShadow:"0 -12px 48px rgba(0,0,0,0.4)",animation:"slideUp 0.25s cubic-bezier(0.22,1,0.36,1)",border:"1px solid rgba(255,245,230,0.04)",borderBottom:"none"}}>{children}</div></div>}
 function MHead({t,s,cls}){return<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}><div><h2 className="serif" style={{fontSize:24,fontWeight:400,color:P.ink}}>{t}</h2>{s&&<div style={{fontSize:12,color:P.ink4,marginTop:3}}>{s}</div>}</div><button onClick={cls} style={{width:34,height:34,borderRadius:10,background:P.bg3,color:P.ink3,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button></div>}
-function TabBtn({on,ck,children}){return<button onClick={ck} style={{flex:1,padding:10,borderRadius:10,fontSize:13,fontWeight:600,fontFamily:"inherit",background:on?"rgba(200,168,85,0.1)":"transparent",color:on?P.gold:P.ink4,transition:"all 0.15s"}}>{children}</button>}
+function TabBtn({on,ck,children}){return<button onClick={ck} style={{flex:1,padding:10,borderRadius:10,fontSize:13,fontWeight:600,fontFamily:"inherit",background:on?"rgba(201,168,76,0.1)":"transparent",color:on?P.gold:P.ink4,transition:"all 0.15s"}}>{children}</button>}
 function SrCard({w,ck,i}){const tc=TP[w.type]||TP.rouge;return<div onClick={ck} style={{display:"flex",gap:12,padding:12,borderRadius:14,cursor:"pointer",background:P.card,border:"1px solid "+P.cardB,marginBottom:8,animation:`fadeIn 0.2s ${i*0.05}s both`,transition:"background 0.15s"}}>
   <div style={{width:44,height:64,borderRadius:10,flexShrink:0,overflow:"hidden",background:w.image?P.bg2:tc.grad,display:"flex",alignItems:"center",justifyContent:"center"}}>
     {w.image?<img src={w.image} alt="" style={{width:"100%",height:"100%",objectFit:"contain"}}/>:<span style={{fontSize:18,opacity:0.5}}>{tc.ic}</span>}
   </div>
-  <div style={{flex:1,minWidth:0}}><div style={{fontSize:14,fontWeight:600,color:P.ink,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.name}</div>
+  <div style={{flex:1,minWidth:0}}>
+    <div style={{fontSize:14,fontWeight:600,color:P.ink,marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.name}</div>
     {w.winery&&<div style={{fontSize:11,color:P.ink4,marginBottom:3}}>{w.winery}</div>}
     <div style={{fontSize:11,color:P.ink3}}>{w.vintage&&w.vintage+" · "}{w.region}</div>
-    <div style={{display:"flex",gap:8,marginTop:3,fontSize:11}}>{w.rating&&<span style={{color:P.gold}}>★ {w.rating}</span>}{w.price&&<span style={{color:P.ink4}}>{w.price}</span>}</div>
+    <div style={{display:"flex",gap:8,marginTop:3,fontSize:11,flexWrap:"wrap"}}>
+      {w.rating&&<span style={{color:P.gold}}>★ {w.rating}</span>}
+      {w.price&&<span style={{color:P.ink4}}>{w.price}</span>}
+      {w.grape&&<span style={{color:P.ink4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:120}}>{w.grape}</span>}
+    </div>
   </div><div style={{color:P.gold,fontSize:20,alignSelf:"center",opacity:0.3}}>+</div></div>}
-function ManualForm({f,sF,rg,is,add}){return<div style={{display:"flex",flexDirection:"column",gap:14}}>
-  <Fld l="Nom *"><input value={f.name} style={is} onChange={e=>sF(p=>({...p,name:e.target.value}))} placeholder="Château Margaux"/></Fld>
-  <div style={{display:"flex",gap:10}}><Fld l="Millésime" s={{flex:1}}><input type="number" style={is} value={f.vintage} onChange={e=>sF(p=>({...p,vintage:e.target.value}))} placeholder="2020"/></Fld>
-    <Fld l="Type" s={{flex:1}}><select value={f.type} style={{...is,appearance:"auto"}} onChange={e=>{const t=e.target.value;sF(p=>({...p,type:t,region:Object.keys(RC[t]||{})[0]||"Autre"}))}}>{Object.entries(TP).map(([k,v])=><option key={k} value={k}>{v.ic} {v.l}</option>)}</select></Fld></div>
-  <Fld l="Région"><select value={rg.includes(f.region)?f.region:"_c"} style={{...is,appearance:"auto"}} onChange={e=>{if(e.target.value!=="_c")sF(p=>({...p,region:e.target.value}));else sF(p=>({...p,region:""}))}}>
-    {rg.map(r=><option key={r} value={r}>{r}</option>)}<option value="_c">✏️ Saisir</option></select>
-    {!rg.includes(f.region)&&<input value={f.region} style={{...is,marginTop:8}} onChange={e=>sF(p=>({...p,region:e.target.value}))} placeholder="Saisir la région..."/>}</Fld>
-  <div style={{display:"flex",gap:10}}><Fld l="Apogée début" s={{flex:1}}><input type="number" style={is} value={f.apogee_start} onChange={e=>sF(p=>({...p,apogee_start:e.target.value}))} placeholder="2025"/></Fld>
-    <Fld l="Apogée fin" s={{flex:1}}><input type="number" style={is} value={f.apogee_end} onChange={e=>sF(p=>({...p,apogee_end:e.target.value}))} placeholder="2035"/></Fld></div>
-  <Fld l="Notes"><textarea rows={2} style={{...is,resize:"vertical"}} value={f.notes} onChange={e=>sF(p=>({...p,notes:e.target.value}))} placeholder="Goût, accords mets-vin..."/></Fld>
-  <button onClick={()=>add({name:f.name,vintage:f.vintage?Number(f.vintage):null,type:f.type,region:f.region||"Autre",image:f.image||null,notes:f.notes||null,rating:null,price:null,vivino_url:null,apogee_start:f.apogee_start?Number(f.apogee_start):null,apogee_end:f.apogee_end?Number(f.apogee_end):null,winery:"",grape:null,description:null,region_raw:f.region||"Autre"})}
-    disabled={!f.name.trim()} style={{padding:16,borderRadius:14,fontSize:15,fontWeight:600,background:`linear-gradient(135deg,${P.wine},#6B1525)`,color:"#F0D8DC",opacity:f.name.trim()?1:0.3,boxShadow:f.name.trim()?"0 4px 20px rgba(139,40,66,0.3)":"none",border:"1px solid rgba(255,200,200,0.08)"}}>Ajouter</button></div>}
 function Fld({l,children,s}){return<div style={s}><div style={{fontSize:11,color:P.ink4,marginBottom:5,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase"}}>{l}</div>{children}</div>}
-function InfoRow({l,v,accent,hl}){return<div style={{marginBottom:10,padding:"12px 16px",borderRadius:14,background:accent?P.goldDim:hl?P.okBg:P.bg2,border:"1px solid "+(accent?"rgba(200,168,85,0.08)":hl?"rgba(76,175,80,0.08)":P.bg3)}}>
+function InfoRow({l,v,accent,hl}){return<div style={{marginBottom:10,padding:"12px 16px",borderRadius:14,background:accent?P.goldDim:hl?P.okBg:P.bg2,border:"1px solid "+(accent?"rgba(201,168,76,0.08)":hl?"rgba(109,175,109,0.08)":P.bg3)}}>
   <div style={{fontSize:10,fontWeight:700,letterSpacing:1,marginBottom:4,color:accent?P.gold:hl?P.ok:P.ink4,textTransform:"uppercase"}}>{l}</div>
   <div style={{fontSize:14,color:P.ink2,lineHeight:1.5}}>{v}</div></div>}
 function Stat({v,l,ic}){return<div style={{background:P.card,borderRadius:16,padding:"18px 14px",textAlign:"center",border:"1px solid "+P.cardB}}>
